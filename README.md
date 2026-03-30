@@ -39,7 +39,7 @@ http://127.0.0.1:5000
 
 ---
 
-## 🧪 Rodar os testes
+## Rodar os testes
 ```bash
 python testes.py
 ```
@@ -63,7 +63,7 @@ SearchStrategy  (ABC)
 | Método | Endpoint       | Descrição                              |
 |--------|---------------|----------------------------------------|
 | GET    | `/`           | Serve o frontend (index.html)          |
-| GET    | `/api/algoritmos` | Lista algoritmos disponíveis      |
+| GET    | `/api/algorithms` | Lista algoritmos disponíveis      |
 | POST   | `/api/search` | Executa um algoritmo específico        |
 | POST   | `/api/compare`| Executa todos os algoritmos e compara  |
 
