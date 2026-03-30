@@ -1,66 +1,95 @@
-# Comparação de Algoritmos de Busca em Strings
-### Aplicação que permite explorar, visualizar e comparar diferentes algoritmos de busca em strings, analisando seu funcionamento passo a passo, desempenho e complexidade.
+# String Search Lab 🔍
+
+Aplicação completa para **exploração, visualização e comparação** de algoritmos de busca em strings,
+implementados com o padrão de projeto **Strategy** em Python.
+
 ---
-### Requisitos de Implementação
-**Arquitetura:**
-Utilização da Linguagem Python e padrão Strategy
 
-SearchStrategy (interface)  ├── NaiveSearch  ├── RabinKarpSearch  ├── KMPSearch  ├── BoyerMooreSearch Interface (sugestão)
-- Web (HTML + JS + backend opcional) ou desktop
+## Estrutura de arquivos
 
-**Elementos:**
+```
+strings-busca/
+├── algoritmos.py   # Padrão Strategy + 4 algoritmos (lógica pura)
+├── controller.py   # Orquestração, serialização JSON
+├── server.py       # Servidor Flask (endpoints da API)
+├── index.html      # Frontend completo (HTML/CSS/JS)
+└── testes.py        # Suite de testes automatizados
 
-1. Upload de arquivos
-2. Input de string
-3. Dropdown de algoritmo
-4. Botão "Executar"
-5. Botão "Passo a passo"
-6. Área de visualização (log da execução)
+```
+
 ---
-### Requisitos Funcionais
-#### Entrada de dados
 
-- Upload de 1 ou N arquivos .txt
-- Campo de entrada para a string a ser buscada
-- Opção para escolher o algoritmo
+## Como rodar
 
-#### Algoritmos obrigatórios
-Implementação dos algoritmos:
+### 1. Instalar dependências
+```bash
+pip install flask
+```
 
-- Busca Naive (força bruta)
-- Rabin-Karp
-- Knuth-Morris-Pratt (KMP)
-- Boyer-Moore
+### 2. Iniciar o servidor
+```bash
+cd strings-busca
+python server.py
+```
 
-#### Execução
-**Executar o código:**
+### 3. Abrir no navegador
+```
+http://127.0.0.1:5000
+```
 
-- Execução normal
-- Execução passo a passo (step-by-step) - usar o debug da linguagem
+---
 
-**Durante o passo a passo, exibir:**
+## 🧪 Rodar os testes
+```bash
+python testes.py
+```
 
-- Índices comparados
-- Comparações realizadas
-- Movimentação do padrão
-- Estruturas auxiliares (ex: tabela LPS do KMP, tabela de saltos do Boyer-Moore)
-- Métricas e análise
-  
-**Para cada execução:**
+---
 
--Tempo de execução (ms ou ns)
-- Número de comparações realizadas
-- Tamanho do texto e do padrão
+## Padrão Strategy
 
-**Exibir também:**
+```
+SearchStrategy  (ABC)
+├── NaiveSearch          → O(n·m) brute force
+├── RabinKarpSearch      → O(n+m) rolling hash
+├── KMPSearch            → O(n+m) LPS table
+└── BoyerMooreSearch     → O(n/m) bad character
+```
 
-Complexidade teórica:
+---
 
-- Naive → O(n * m)
-- Rabin-Karp → O(n + m) (médio)
-- KMP → O(n + m)
-- Boyer-Moore → O(n / m) (melhor caso)
+## API Endpoints
 
-**Comparação entre:**
+| Método | Endpoint       | Descrição                              |
+|--------|---------------|----------------------------------------|
+| GET    | `/`           | Serve o frontend (index.html)          |
+| GET    | `/api/algoritmos` | Lista algoritmos disponíveis      |
+| POST   | `/api/search` | Executa um algoritmo específico        |
+| POST   | `/api/compare`| Executa todos os algoritmos e compara  |
 
-Tempo real vs complexidade esperada
+### POST /api/search
+```json
+{
+  "text":      "AABAACAADAABAABA",
+  "pattern":   "AABA",
+  "algorithm": "kmp"
+}
+```
+Algoritmos: `naive`, `rabin-karp`, `kmp`, `boyer-moore`
+
+---
+
+## Funcionalidades da Interface
+
+- **Upload de arquivos .txt** (um ou múltiplos, suporte a drag & drop)
+- **Digitação manual** do texto
+- **Seleção visual** do algoritmo
+- **Execução normal** → posições encontradas + métricas
+- **Passo a passo** → slider interativo, reprodução automática,
+  texto e padrão coloridos em tempo real, log detalhado
+- **Tabelas internas**:
+  - KMP → tabela LPS completa
+  - Boyer-Moore → tabela Bad Character
+  - Rabin-Karp → hashes de cada janela
+- **Comparação** → gráficos de barras animados, tabela completa,
+  dicas de uso para cada algoritmo
