@@ -21,25 +21,25 @@ strings-busca/
 
 ## Como rodar
 
-### 1. Instalar dependências
+#### 1. Instalar dependências
 ```bash
 pip install flask
 ```
 
-### 2. Iniciar o servidor
+#### 2. Iniciar o servidor
 ```bash
 cd strings-busca
 python server.py
 ```
 
-### 3. Abrir no navegador
+#### 3. Abrir no navegador
 ```
 http://127.0.0.1:5000
 ```
 
 ---
 
-## Rodar os testes
+### Para rodar os testes
 ```bash
 python testes.py
 ```
