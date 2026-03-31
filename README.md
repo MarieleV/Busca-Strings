@@ -9,10 +9,10 @@ implementados com o padrão de projeto **Strategy** em Python.
 
 ```
 strings-busca/
-├── algoritmos.py   # Padrão Strategy + 4 algoritmos (lógica pura)
+├── algoritmos.py   # Padrão Strategy + Algoritmos Obrigatórios
 ├── controller.py   # Orquestração, serialização JSON
 ├── server.py       # Servidor Flask (endpoints da API)
-├── index.html      # Frontend completo (HTML/CSS/JS)
+├── index.html      # Front-end completo (HTML/CSS/JS)
 └── testes.py        # Suite de testes automatizados
 
 ```
