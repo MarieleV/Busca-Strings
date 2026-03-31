@@ -5,7 +5,7 @@ from algoritmos import (
     NaiveSearch, RabinKarpSearch, KMPSearch, BoyerMooreSearch,
 )
 
-# Registro de todas as estratégias disponíveis
+# Registro de todas as estratégias
 STRATEGIES: Dict[str, SearchStrategy] = {
     "naive":       NaiveSearch(),
     "rabin-karp":  RabinKarpSearch(),

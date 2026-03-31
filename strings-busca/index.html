@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>String Search Lab</title>
+<title>Busca String Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── TOKENS (TEMA CLARO / CLEAN) ────────────────── */
+/* TEMA CLARO */
 :root {
   --bg:        #f3f4f6;
   --surface:   #ffffff;
@@ -35,17 +35,17 @@
   --sans:      'Poppins', sans-serif;
 }
 
-/* ── RESET ──────────────────────────────────────── */
+/* RESET  */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:15px;scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
 
-/* ── SCROLLBAR ──────────────────────────────────── */
+/* BARRA DE ROLAGEM */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
-/* ── LAYOUT ─────────────────────────────────────── */
+/* LAYOUT */
 .shell{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
 
 header{
@@ -79,7 +79,7 @@ header .spacer{flex:1}
 
 .main{display:grid;grid-template-columns:380px 1fr;height:calc(100vh - 57px)}
 
-/* ── SIDEBAR ─────────────────────────────────────── */
+/* BARRA LATERAL */
 .sidebar{
   background:var(--surface);border-right:1px solid var(--border);
   overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.4rem;
@@ -92,7 +92,7 @@ header .spacer{flex:1}
 }
 .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
 
-/* textarea */
+/* texto */
 textarea,input[type=text]{
   width:100%;background:var(--surface2);border:1px solid var(--border);
   border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:.8rem;
@@ -102,7 +102,7 @@ textarea:focus,input[type=text]:focus{border-color:var(--accent);background:var(
 textarea{min-height:110px;max-height:220px}
 .input-label{font-size:.75rem;color:var(--muted);margin-bottom:.35rem;display:block}
 
-/* file upload */
+/* upload de arquivo */
 .upload-zone{
   border:1.5px dashed var(--border2);border-radius:var(--radius);
   padding:.9rem;text-align:center;cursor:pointer;transition:all .2s;
@@ -155,10 +155,10 @@ textarea{min-height:110px;max-height:220px}
 .btn-compare:hover{background:linear-gradient(135deg,rgba(79, 70, 229, .15),rgba(147, 51, 234, .15));transform:translateY(-1px)}
 .btn:disabled{opacity:.6;cursor:not-allowed;transform:none!important}
 
-/* ── CONTENT AREA ───────────────────────────────── */
+/*  ÁREA DE CONTEÚDO */
 .content{overflow-y:auto;display:flex;flex-direction:column}
 
-/* tabs */
+/* guias */
 .tabs{
   display:flex;gap:0;border-bottom:1px solid var(--border);
   padding:0 1.5rem;background:var(--surface);position:sticky;top:0;z-index:50;
@@ -178,7 +178,7 @@ textarea{min-height:110px;max-height:220px}
 .tab-pane{display:none;padding:1.5rem;flex:1;flex-direction:column;gap:1.5rem}
 .tab-pane.active{display:flex}
 
-/* results card */
+/* cards de resultados */
 .result-card{
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
   padding:1.25rem;
@@ -192,7 +192,7 @@ textarea{min-height:110px;max-height:220px}
   padding:.15rem .5rem;border-radius:4px;margin-left:auto;
 }
 
-/* metrics row */
+/* linha de métricas */
 .metrics{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
 .metric{
   background:var(--surface2);border:1px solid var(--border);
@@ -201,7 +201,7 @@ textarea{min-height:110px;max-height:220px}
 .metric .val{font-family:var(--mono);font-size:1rem;font-weight:800;color:var(--text)}
 .metric .lbl{font-size:.62rem;color:var(--muted);margin-top:.1rem}
 
-/* positions */
+/* posições */
 .positions{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem}
 .pos-chip{
   font-family:var(--mono);font-size:.7rem;font-weight:600;
@@ -210,7 +210,7 @@ textarea{min-height:110px;max-height:220px}
 }
 .no-match{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
 
-/* complexity */
+/* complexidade */
 .complexity-row{display:flex;gap:.5rem;flex-wrap:wrap}
 .cmplx-badge{
   font-family:var(--mono);font-size:.65rem;padding:.2rem .55rem;border-radius:5px;
@@ -218,7 +218,7 @@ textarea{min-height:110px;max-height:220px}
 }
 .cmplx-badge span{font-weight:700;color:var(--cyan)}
 
-/* ── TEXT VISUALISER ─────────────────────────────── */
+/* VER TEXTO */
 .text-vis{
   font-family:var(--mono);font-size:.78rem;line-height:2;
   word-break:break-all;background:var(--surface2);
@@ -234,7 +234,7 @@ textarea{min-height:110px;max-height:220px}
 .char.hi-mismatch{background:rgba(220, 38, 38, .15)!important;color:var(--red)!important}
 .char.hi-current{background:var(--yellow)!important;color:#fff!important;font-weight:700;animation:pulse .6s ease infinite alternate}
 
-/* pattern vis */
+/* padrão visual */
 .pattern-vis{display:flex;gap:2px;margin-top:.5rem;flex-wrap:wrap}
 .pchar{
   width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;
@@ -246,7 +246,7 @@ textarea{min-height:110px;max-height:220px}
 .pchar.hi-mismatch{background:rgba(220, 38, 38, .15);border-color:var(--red);color:var(--red)}
 .pchar.hi-current{background:var(--yellow);border-color:var(--yellow);color:#fff}
 
-/* step log */
+/* registro de etapas */
 .step-log{
   font-family:var(--mono);font-size:.72rem;background:var(--surface2);
   border:1px solid var(--border);border-radius:var(--radius);
@@ -261,19 +261,19 @@ textarea{min-height:110px;max-height:220px}
 .step-entry.info{background:rgba(2, 132, 199, .1);color:var(--cyan)}
 .step-num{color:var(--muted);min-width:3ch;text-align:right;flex-shrink:0}
 
-/* step controls */
+/* controles de etapa */
 .step-ctrl{display:flex;align-items:center;gap:.75rem}
 .step-slider{flex:1;appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none}
 .step-slider::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
 .step-count{font-family:var(--mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
 
-/* ── EXTRA TABLES ───────────────────────────────── */
+/*  tabelas extras */
 .extra-table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:.72rem}
 .extra-table th{background:var(--surface2);padding:.4rem .6rem;text-align:left;color:var(--muted);border:1px solid var(--border)}
 .extra-table td{padding:.35rem .6rem;border:1px solid var(--border)}
 .extra-table tr:hover td{background:rgba(79, 70, 229, .04)}
 
-/* ── COMPARISON TAB ─────────────────────────────── */
+/* ABA DE COMPARAÇÃO  */
 .compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 .cmp-card{
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
@@ -282,7 +282,7 @@ textarea{min-height:110px;max-height:220px}
 }
 .cmp-title{font-size:.8rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
 
-/* bar chart */
+/* gráfico de barras */
 .bar-chart{display:flex;flex-direction:column;gap:.45rem}
 .bar-row{display:flex;align-items:center;gap:.6rem}
 .bar-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);width:100px;flex-shrink:0;text-align:right}
@@ -290,7 +290,7 @@ textarea{min-height:110px;max-height:220px}
 .bar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.23,1,.32,1);display:flex;align-items:center;padding:0 .4rem}
 .bar-val{font-family:var(--mono);font-size:.6rem;font-weight:700;color:#fff;white-space:nowrap}
 
-/* ── EMPTY / PLACEHOLDER ─────────────────────────── */
+/* VAZIO / ESPAÇO RESERVADO  */
 .empty{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:3rem;color:var(--muted);gap:.75rem;text-align:center;flex:1;
@@ -298,7 +298,7 @@ textarea{min-height:110px;max-height:220px}
 .empty-icon{font-size:2.5rem;opacity:.4}
 .empty-text{font-size:.85rem}
 
-/* ── LOADER ──────────────────────────────────────── */
+/*  LOADER  */
 .loader{
   display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
   border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;
@@ -308,7 +308,7 @@ textarea{min-height:110px;max-height:220px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .fade-in{animation:fadeIn .3s ease both}
 
-/* ── RESPONSIVE (minimal) ───────────────────────── */
+/* RESPONSIVIDADE */
 @media(max-width:900px){
   .main{grid-template-columns:1fr}
   .sidebar{max-height:50vh}
@@ -321,30 +321,32 @@ textarea{min-height:110px;max-height:220px}
 
 <header>
   <div>
-    <div class="logo">String<span>Search</span>Lab</div>
-    <div class="logo-sub">algoritmos de busca em strings · padrão Strategy</div>
+    <div class="logo">Busca<span>String</span>Lab</div>
+    <div class="logo-sub">algoritmos de busca em strings · Padrão Strategy</div>
   </div>
   <div class="spacer"></div>
-  <span class="badge">Python · Strategy Pattern</span>
 </header>
 
 <div class="main">
 
 <aside class="sidebar">
 
-  <div>
-    <div class="section-label">Texto fonte</div>
-    <label class="upload-zone" id="upload-zone">
-      <input type="file" id="file-input" accept=".txt" multiple>
+<div>
+  <div class="section-label">Texto fonte</div>
+  <div class="upload-zone" id="upload-zone">
+    <label for="file-input" class="upload-click">
       <div class="upload-icon">📁</div>
-      <div class="upload-text">Clique ou arraste arquivos <strong>.txt</strong></div>
-      <div id="file-list"></div>
+      <div class="upload-text">Clique para selecionar <strong>.txt</strong></div>
     </label>
-    <div style="margin:.5rem 0;text-align:center;font-size:.65rem;color:var(--muted)">— ou —</div>
-    <label class="input-label">Digitar texto manualmente</label>
-    <textarea id="text-input" placeholder="Cole ou digite o texto aqui…" rows="4"></textarea>
-    <div style="margin-top:.3rem;font-family:var(--mono);font-size:.65rem;color:var(--muted)" id="text-len">0 caracteres</div>
+    <input type="file" id="file-input" accept=".txt" multiple hidden>
+    <div id="file-list"></div>
   </div>
+  <div style="margin:.5rem 0;text-align:center;font-size:.65rem;color:var(--muted)">— ou —</div>
+  <label class="input-label">Digitar texto manualmente</label>
+  <textarea id="text-input" placeholder="Cole ou digite o texto aqui…" rows="4"></textarea>
+
+  <div style="margin-top:.3rem;font-family:var(--mono);font-size:.65rem;color:var(--muted)" id="text-len">0 caracteres</div>
+</div>
 
   <div>
     <div class="section-label">Padrão</div>
@@ -463,9 +465,8 @@ textarea{min-height:110px;max-height:220px}
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════════════
+
+//  ESTADO
 const state = {
   algo: 'naive',
   lastResult: null,
@@ -488,9 +489,7 @@ const ALGO_NAMES = {
   'boyer-moore': 'Boyer-Moore',
 };
 
-// ══════════════════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════════════════
+//  AJUDANTES
 function getText()    { return document.getElementById('text-input').value; }
 function getPattern() { return document.getElementById('pattern-input').value; }
 function getAlgo()    { return state.algo; }
@@ -517,9 +516,8 @@ async function apiPost(endpoint, body) {
   return r.json();
 }
 
-// ══════════════════════════════════════════════════════════════
-//  FILE UPLOAD
-// ══════════════════════════════════════════════════════════════
+
+//  UPLOAD DO ARQUIVO
 const fileInput = document.getElementById('file-input');
 const fileList  = document.getElementById('file-list');
 const textInput = document.getElementById('text-input');
@@ -552,9 +550,8 @@ function updateLengths() {
 textInput.addEventListener('input', updateLengths);
 document.getElementById('pattern-input').addEventListener('input', updateLengths);
 
-// ══════════════════════════════════════════════════════════════
+
 //  ALGO SELECTOR
-// ══════════════════════════════════════════════════════════════
 document.getElementById('algo-grid').addEventListener('click', e => {
   const card = e.target.closest('.algo-card');
   if (!card) return;
@@ -563,16 +560,12 @@ document.getElementById('algo-grid').addEventListener('click', e => {
   state.algo = card.dataset.algo;
 });
 
-// ══════════════════════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════════════════════
+//  GUIAS
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => showTab(tab.dataset.tab));
 });
 
-// ══════════════════════════════════════════════════════════════
-//  RUN SEARCH
-// ══════════════════════════════════════════════════════════════
+//  EXECUTAR PESQUISA
 document.getElementById('btn-run').addEventListener('click', async () => {
   const text = getText(), pattern = getPattern();
   if (!text || !pattern) return alert('Informe o texto e o padrão.');
@@ -590,9 +583,8 @@ document.getElementById('btn-run').addEventListener('click', async () => {
   }
 });
 
-// ══════════════════════════════════════════════════════════════
-//  RENDER RESULT
-// ══════════════════════════════════════════════════════════════
+
+//  RESULTADO DA RENDERIZAÇÃO
 function renderResult(r) {
   const empty   = document.getElementById('result-empty');
   const content = document.getElementById('result-content');

@@ -10,11 +10,11 @@ import time
 class SearchStep:
     step_number: int
     text_index: int          # posição atual no texto
-    pattern_index: int       # posição atual no padrão
+    pattern_index: int       # posição atual no pattern
     comparison: str          # descrição comparativa legível
     match: bool              # essa comparação foi pertinente?
     highlight_text: List[int] = field(default_factory=list)    # índices destacados no texto
-    highlight_pattern: List[int] = field(default_factory=list) # índices destacados no padrão
+    highlight_pattern: List[int] = field(default_factory=list) # índices destacados no pattern
     extra: Dict[str, Any] = field(default_factory=dict)        # estado específico do algoritmo
 
 
@@ -34,11 +34,11 @@ class SearchResult:
     complexity_worst: str = ""
 
 
-#  Padrão Strategy
+#  pattern Strategy
 
 class SearchStrategy(ABC):
     """
-    Estratégia abstrata, todo algoritmo concreto deve implementar a função `search`.
+    Por ser abstrata, todo algoritmo concreto deve implementar a função `search`.
     Ela retorna um `SearchResult` contendo posições, métricas e registros de passos.
     """
     name: str = "Abstract"
@@ -163,7 +163,7 @@ class RabinKarpSearch(SearchStrategy):
                 "window_start": i,
             }
             if hash_match:
-                # Verify character by character
+                # Verificação de caractere por caractere
                 for j in range(m):
                     comparisons += 1
                     match = text[i + j] == pattern[j]
@@ -195,7 +195,7 @@ class RabinKarpSearch(SearchStrategy):
                 ))
                 step_num += 1
 
-            # Roll the hash
+            # Rola o hash
             if i < n - m:
                 txt_hash = (B * (txt_hash - ord(text[i]) * h) + ord(text[i + m])) % MOD
                 if txt_hash < 0:
@@ -216,7 +216,7 @@ class RabinKarpSearch(SearchStrategy):
 
 class KMPSearch(SearchStrategy):
     """
-    Pré-processa o padrão para construir a tabela
+    Pré-processa o pattern para construir a tabela
     LPS(Longest Proper Prefix which is also Suffix.Prefixo Próprio Mais Longo que também é Sufixo),
     permitindo que o algoritmo ignore comparações redundantes.
     """
@@ -257,7 +257,7 @@ class KMPSearch(SearchStrategy):
         lps = self._build_lps(pattern)
 
         i = 0  # índice no texto
-        j = 0  # índice em padrão
+        j = 0  # índice em pattern
 
         while i < n:
             comparisons += 1
@@ -298,7 +298,7 @@ class KMPSearch(SearchStrategy):
 
 class BoyerMooreSearch(SearchStrategy):
     """
-    Analisa o padrão da direita para a esquerda e usa a heurística de Caractere Ruim para
+    Analisa o pattern da direita para a esquerda e usa a heurística de Caractere Ruim para
     fazer grandes saltos, alcançando desempenho sublinear em entradas típicas.
     """
     name = "Boyer-Moore"
@@ -324,10 +324,10 @@ class BoyerMooreSearch(SearchStrategy):
             return self._make_result(text, pattern, [], 0, [], elapsed)
 
         bad_char = self._bad_char_table(pattern)
-        s = 0  # shift of pattern over text
+        s = 0  # mudança do pattern ao longo do texto
 
         while s <= n - m:
-            j = m - 1  # start matching from right
+            j = m - 1  # começa a combinar da direita
 
             while j >= 0:
                 comparisons += 1
