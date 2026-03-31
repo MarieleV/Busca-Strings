@@ -14,11 +14,11 @@ STRATEGIES: Dict[str, SearchStrategy] = {
 }
 
 
-def run_search(algorithm: str, text: str, pattern: str) -> Dict[str, Any]:
+def run_search(algoritmo: str, text: str, pattern: str) -> Dict[str, Any]:
     """
     Execute o algoritmo selecionado e retorne um dicionário de resultados serializável em JSON.
     """
-    strategy = STRATEGIES.get(algorithm)
+    strategy = STRATEGIES.get(algoritmo)
     if strategy is None:
         return {"error": f"Unknown algorithm: {algorithm}"}
 
@@ -38,7 +38,7 @@ def _serialise(r: SearchResult) -> Dict[str, Any]:
     return {
         "algorithm": r.algorithm,
         "positions": r.positions,
-        "comparisons": r.comparisons,
+        "comparacoes": r.comparacoes,
         "elapsed_ms": round(r.elapsed_ms, 4),
         "text_length": len(r.text),
         "pattern_length": len(r.pattern),
@@ -53,10 +53,10 @@ def _serialise(r: SearchResult) -> Dict[str, Any]:
                 "step_number":        s.step_number,
                 "text_index":         s.text_index,
                 "pattern_index":      s.pattern_index,
-                "comparison":         s.comparison,
+                "comparacao":         s.comparacao,
                 "match":              s.match,
-                "highlight_text":     s.highlight_text,
-                "highlight_pattern":  s.highlight_pattern,
+                "destaque_text":     s.destaque_text,
+                "destaque_pattern":  s.destaque_pattern,
                 "extra":              s.extra,
             }
             for s in r.steps

@@ -614,7 +614,7 @@ function renderResult(r) {
           <div class="lbl">Tempo de execução</div>
         </div>
         <div class="metric">
-          <div class="val">${r.comparisons.toLocaleString()}</div>
+          <div class="val">${r.comparacoes.toLocaleString()}</div>
           <div class="lbl">Comparações</div>
         </div>
         <div class="metric">
@@ -710,7 +710,7 @@ function renderStep(idx) {
 
   document.getElementById('step-slider').value = idx;
   document.getElementById('step-count-label').textContent =
-    `Passo ${idx + 1} / ${steps.length}  ·  ${r.comparisons} comparações total`;
+    `Passo ${idx + 1} / ${steps.length}  ·  ${r.comparacoes} comparações total`;
 
   // ─ Text visualiser ─
   const text    = r.text || '';
@@ -724,7 +724,7 @@ function renderStep(idx) {
     if (step) {
       if (step.highlight_text.includes(i) && !matchSet.has(i)) cls = 'hi-window';
       if (matchSet.has(i)) cls = 'hi-match';
-      if (i === step.text_index) cls = step.match ? 'hi-match' : step.comparison.includes('mismatch') || !step.match ? 'hi-mismatch' : 'hi-current';
+      if (i === step.text_index) cls = step.match ? 'hi-match' : step.comparacao.includes('mismatch') || !step.match ? 'hi-mismatch' : 'hi-current';
     }
     return `<span class="char ${cls}" title="[${i}]">${escHtml(ch)}</span>`;
   }).join('');
@@ -751,16 +751,16 @@ function renderStep(idx) {
     const cls = isCurrent ? (s.match ? 'ok' : 'fail') : 'info';
     return `<div class="step-entry ${cls}">
       <span class="step-num">${s.step_number + 1}</span>
-      <span>${escHtml(s.comparison)}</span>
+      <span>${escHtml(s.comparacao)}</span>
     </div>`;
   }).join('');
   log.scrollTop = log.scrollHeight;
 
   // ─ Partial metrics ─
-  const comparisonsUpToNow = idx + 1;
+  const comparacoesUpToNow = idx + 1;
   const matchesSoFar = r.positions.filter(p => step && p + plen - 1 <= step.text_index).length;
   document.getElementById('step-metrics').innerHTML = `
-    <div class="metric"><div class="val">${comparisonsUpToNow}</div><div class="lbl">Comparações até aqui</div></div>
+    <div class="metric"><div class="val">${comparacoesUpToNow}</div><div class="lbl">Comparações até aqui</div></div>
     <div class="metric"><div class="val">${matchesSoFar}</div><div class="lbl">Ocorrências parciais</div></div>
     <div class="metric"><div class="val">${step ? step.text_index : '-'}</div><div class="lbl">Posição no texto</div></div>
     <div class="metric"><div class="val">${step ? step.pattern_index : '-'}</div><div class="lbl">Posição no padrão</div></div>
@@ -926,7 +926,7 @@ function renderCompare(results) {
   results.forEach((r, i) => { byKey[algoKeys[i]] = r; });
 
   const maxTime  = Math.max(...results.map(r => r.elapsed_ms)) || 1;
-  const maxCmp   = Math.max(...results.map(r => r.comparisons)) || 1;
+  const maxCmp   = Math.max(...results.map(r => r.comparacoes)) || 1;
 
   content.innerHTML = `
     <div class="compare-grid">
@@ -953,12 +953,12 @@ function renderCompare(results) {
         <div class="bar-chart">
           ${algoKeys.map(k => {
             const r = byKey[k];
-            const pct = Math.max(2, (r.comparisons / maxCmp) * 100);
+            const pct = Math.max(2, (r.comparacoes / maxCmp) * 100);
             return `<div class="bar-row">
               <span class="bar-label">${r.algorithm}</span>
               <div class="bar-track">
                 <div class="bar-fill" style="width:${pct}%;background:${ALGO_COLORS[k]}">
-                  <span class="bar-val">${r.comparisons.toLocaleString()}</span>
+                  <span class="bar-val">${r.comparacoes.toLocaleString()}</span>
                 </div>
               </div>
             </div>`;
@@ -987,7 +987,7 @@ function renderCompare(results) {
               return `<tr>
                 <td style="color:${ALGO_COLORS[k]};font-weight:700">${r.algorithm}</td>
                 <td style="${fastest ? 'color:var(--green);font-weight:700' : ''}">${r.elapsed_ms} ms ${fastest ? '🏆' : ''}</td>
-                <td>${r.comparisons.toLocaleString()}</td>
+                <td>${r.comparacoes.toLocaleString()}</td>
                 <td style="color:var(--green)">${r.positions.length}</td>
                 <td style="color:var(--cyan);font-family:var(--mono);font-size:.7rem">${r.complexity.best}</td>
                 <td style="color:var(--yellow);font-family:var(--mono);font-size:.7rem">${r.complexity.avg}</td>

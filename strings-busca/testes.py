@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from algoritmos import NaiveSearch, RabinKarpSearch, KMPSearch, BoyerMooreSearch
 
-STRATEGIES = [NaiveSearch(), RabinKarpSearch(), KMPSearch(), BoyerMooreSearch()]
+ESTRATEGIAS = [NaiveSearch(), RabinKarpSearch(), KMPSearch(), BoyerMooreSearch()]
 
 CASES = [
     # (texto, padrão, posições esperadas)
@@ -19,25 +19,25 @@ CASES = [
     ("abcabdabc",        "abc",     [0, 6]),
 ]
 
-PASS = "✅"
-FAIL = "❌"
+PASS = True
+FAIL = False
 total = passed = 0
 
 print("\n" + "═"*60)
 print("  Busca por string | Conjunto de testes")
 print("═"*60)
 
-for strategy in STRATEGIES:
-    print(f"\n── {strategy.name} ──────────────────────────────")
-    for text, pat, expected in CASES:
-        result = strategy.search(text, pat)
-        ok = sorted(result.positions) == sorted(expected)
+for estrategia in ESTRATEGIAS:
+    print(f"\n── {estrategia.nome} ──────────────────────────────")
+    for texto, pat, expected in CASES:
+        result = estrategia.search(texto, pat)
+        ok = sorted(result.posicoes) == sorted(expected)
         status = PASS if ok else FAIL
         total += 1
         if ok:
             passed += 1
-        label = f'"{text[:20]}{"…" if len(text)>20 else ""}" / "{pat}"'
-        print(f"  {status}  {label:<38}  positions={result.positions}")
+        label = f'"{texto[:20]}{"…" if len(texto)>20 else ""}" / "{pat}"'
+        print(f"  {status}  {label:<38}  posicoes={result.posicoes}")
         if not ok:
             print(f"       Expected: {expected}")
 
