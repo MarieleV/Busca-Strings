@@ -1,4 +1,4 @@
-# String Search Lab 🔍
+# String Busca Lab 🔍
 
 Aplicação completa para **exploração, visualização e comparação** de algoritmos de busca em strings,
 implementados com o padrão de projeto **Strategy** em Python.
@@ -10,8 +10,8 @@ implementados com o padrão de projeto **Strategy** em Python.
 ```
 strings-busca/
 ├── algoritmos.py   # Padrão Strategy + Algoritmos Obrigatórios
-├── controller.py   # Orquestração, serialização JSON
-├── server.py       # Servidor Flask (endpoints da API)
+├── controlador.py   # Orquestração, serialização JSON
+├── servidor.py       # Servidor Flask (endpoints da API)
 ├── index.html      # Front-end completo (HTML/CSS/JS)
 └── testes.py        # Suite de testes automatizados
 
@@ -29,7 +29,7 @@ pip install flask
 #### 2. Iniciar o servidor
 ```bash
 cd strings-busca
-python server.py
+python servidor.py
 ```
 
 #### 3. Abrir no navegador
