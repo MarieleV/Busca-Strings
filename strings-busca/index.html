@@ -3,316 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Busca String Lab</title>
+<title>String Busca Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* TEMA CLARO */
 :root {
-  --bg:        #f3f4f6;
-  --surface:   #ffffff;
-  --surface2:  #f8fafc;
-  --border:    #e2e8f0;
-  --border2:   #cbd5e1;
-  --text:      #0f172a;
-  --muted:     #64748b;
-  --accent:    #4f46e5;
-  --accent2:   #9333ea;
-  --green:     #059669;
-  --yellow:    #d97706;
-  --red:       #dc2626;
-  --cyan:      #0284c7;
-  --orange:    #ea580c;
-
-  --algo-naive: #4f46e5;
-  --algo-rk:    #db2777;
-  --algo-kmp:   #059669;
-  --algo-bm:    #ea580c;
-
-  --radius:    10px;
-  --radius-lg: 18px;
-  --mono:      'JetBrains Mono', monospace;
-  --sans:      'Poppins', sans-serif;
+  /* Paleta Light Mode Clean */
+  --fundo:           #f8fafc;
+  --superficie:      #ffffff;
+  --superficie2:     #f1f5f9;
+  --borda:           #e2e8f0;
+  --borda2:          #cbd5e1;
+  --texto:           #0f172a;
+  --muted:           #64748b;
+  
+  /* Cores de destaque ajustadas para contraste no fundo claro */
+  --acento:          #4f46e5;
+  --acento2:         #9333ea;
+  --verde:           #10b981;
+  --amarelo:         #eab308;
+  --vermelho:        #ef4444;
+  --ciano:           #0ea5e9;
+  
+  /* Cores dos algoritmos */
+  --cor-naive:     #4f46e5;
+  --cor-rabinkarp:   #db2777;
+  --cor-kmp:         #10b981;
+  --cor-boyermoore:  #ea580c;
+  
+  --raio:    10px;
+  --raio-lg: 18px;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Syne', sans-serif;
 }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { background: var(--fundo); color: var(--texto); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--superficie); }
+::-webkit-scrollbar-thumb { background: var(--borda2); border-radius: 3px; }
 
-/* RESET  */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:15px;scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
-
-/* BARRA DE ROLAGEM */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-
-/* LAYOUT */
-.shell{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
-
-header{
-  padding:1.25rem 2rem;
-  border-bottom:1px solid var(--border);
-  background:rgba(255, 255, 255, 0.85);
-  display:flex;align-items:center;gap:1rem;
-  position:sticky;top:0;z-index:100;
-  backdrop-filter:blur(12px);
+/* ── layout ─────────────────────────────────────────────── */
+.shell { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+header {
+  padding: 1.1rem 2rem; border-bottom: 1px solid var(--borda);
+  background: var(--superficie); display: flex; align-items: center; gap: 1rem;
+  position: sticky; top: 0; z-index: 100;
 }
-.logo{
-  font-size:1.1rem;
-  font-weight:700;
-  letter-spacing:-0.01em;
-  white-space:nowrap;
+.logo { font-size: 1.05rem; font-weight: 800; letter-spacing: -.02em; }
+.logo span { color: var(--acento); }
+.logo-sub { font-family: var(--mono); font-size: .65rem; color: var(--muted); margin-top: .1rem; }
+.espaco { flex: 1; }
+.badge {
+  font-family: var(--mono); font-size: .62rem;
+  background: rgba(79, 70, 229, .1); border: 1px solid rgba(79, 70, 229, .25);
+  color: var(--acento); padding: .2rem .6rem; border-radius: 4px; white-space: nowrap;
 }
+.main { display: grid; grid-template-columns: 370px 1fr; height: calc(100vh - 54px); }
 
-.logo span{color:var(--accent)}
-
-.logo-sub{font-family:var(--mono);
-  font-size:.7rem;color:var(--muted);
-  margin-top:.1rem}
-
-header .spacer{flex:1}
-
-.badge{
-  font-family:var(--mono);font-size:.65rem;
-  background:rgba(79, 70, 229, .1);border:1px solid rgba(79, 70, 229, .25);
-  color:var(--accent);padding:.2rem .6rem;border-radius:4px;
+/* ── sidebar ─────────────────────────────────────────────── */
+.sidebar {
+  background: var(--superficie); border-right: 1px solid var(--borda);
+  overflow-y: auto; padding: 1.4rem; display: flex; flex-direction: column; gap: 1.3rem;
 }
-
-.main{display:grid;grid-template-columns:380px 1fr;height:calc(100vh - 57px)}
-
-/* BARRA LATERAL */
-.sidebar{
-  background:var(--surface);border-right:1px solid var(--border);
-  overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.4rem;
+.sec-titulo {
+  font-family: var(--mono); font-size: .62rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .12em; color: var(--muted);
+  display: flex; align-items: center; gap: .5rem; margin-bottom: .7rem;
 }
-
-.section-label{
-  font-family:var(--mono);font-size:.65rem;font-weight:600;
-  text-transform:uppercase;letter-spacing:.12em;color:var(--muted);
-  display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;
+.sec-titulo::after { content: ''; flex: 1; height: 1px; background: var(--borda); }
+textarea, input[type=text] {
+  width: 100%; background: var(--superficie2); border: 1px solid var(--borda);
+  border-radius: var(--raio); color: var(--texto); font-family: var(--mono); font-size: .78rem;
+  padding: .7rem; resize: vertical; outline: none; transition: border .2s;
 }
-.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* texto */
-textarea,input[type=text]{
-  width:100%;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:.8rem;
-  padding:.75rem;resize:vertical;outline:none;transition:border .2s;
+textarea:focus, input[type=text]:focus { border-color: var(--acento); background: var(--superficie); }
+textarea { min-height: 100px; max-height: 200px; }
+.lbl { font-size: .72rem; color: var(--muted); margin-bottom: .3rem; display: block; font-weight: 600; }
+.zona-upload {
+  border: 1.5px dashed var(--borda2); border-radius: var(--raio);
+  padding: .85rem; text-align: center; cursor: pointer; transition: all .2s; background: var(--superficie2);
 }
-textarea:focus,input[type=text]:focus{border-color:var(--accent);background:var(--surface)}
-textarea{min-height:110px;max-height:220px}
-.input-label{font-size:.75rem;color:var(--muted);margin-bottom:.35rem;display:block}
-
-/* upload de arquivo */
-.upload-zone{
-  border:1.5px dashed var(--border2);border-radius:var(--radius);
-  padding:.9rem;text-align:center;cursor:pointer;transition:all .2s;
-  background:var(--surface2);
+.zona-upload:hover { border-color: var(--acento); background: rgba(79, 70, 229,.05); }
+.zona-upload input { display: none; }
+.upload-icone { font-size: 1.3rem; margin-bottom: .25rem; }
+.upload-txt { font-size: .7rem; color: var(--muted); }
+#lista-arq { font-family: var(--mono); font-size: .65rem; color: var(--verde); margin-top: .35rem; text-align: left; }
+.grade-algos { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.card-algo {
+  border: 1.5px solid var(--borda); border-radius: var(--raio);
+  padding: .6rem .65rem; cursor: pointer; transition: all .2s; background: var(--superficie2);
 }
-.upload-zone:hover{border-color:var(--accent);background:rgba(79, 70, 229, .03)}
-.upload-zone input{display:none}
-.upload-icon{font-size:1.4rem;margin-bottom:.3rem}
-.upload-text{font-size:.72rem;color:var(--muted)}
-#file-list{font-family:var(--mono);font-size:.68rem;color:var(--green);margin-top:.4rem;text-align:left}
-
-/* algo selector */
-.algo-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
-.algo-card{
-  border:1.5px solid var(--border);border-radius:var(--radius);
-  padding:.65rem .7rem;cursor:pointer;transition:all .2s;
-  background:var(--surface);
+.card-algo:hover { border-color: var(--borda2); }
+.card-algo.sel { background: rgba(79, 70, 229,.08); }
+.card-algo .nome { font-size: .76rem; font-weight: 700; color: var(--texto); }
+.card-algo .cmplx { font-family: var(--mono); font-size: .6rem; color: var(--muted); margin-top: .12rem; }
+.card-algo[data-algo="naive"].sel     { border-color: var(--cor-naive);    background: rgba(79, 70, 229,.08); }
+.card-algo[data-algo="rabin-karp"].sel  { border-color: var(--cor-rabinkarp);  background: rgba(219, 39, 119,.08); }
+.card-algo[data-algo="kmp"].sel         { border-color: var(--cor-kmp);        background: rgba(16, 185, 129,.08);  }
+.card-algo[data-algo="boyer-moore"].sel { border-color: var(--cor-boyermoore); background: rgba(234, 88, 12,.08);  }
+.linha-btn { display: flex; gap: .45rem; }
+.btn {
+  flex: 1; padding: .6rem; border-radius: var(--raio); border: 1px solid var(--borda);
+  font-family: var(--sans); font-size: .78rem; font-weight: 700; cursor: pointer;
+  transition: all .18s; display: flex; align-items: center; justify-content: center; gap: .35rem;
 }
-.algo-card:hover{border-color:var(--border2);background:var(--surface2)}
-.algo-card.selected{background:rgba(79, 70, 229, .06);border-color:var(--accent)}
-.algo-card .name{font-size:.78rem;font-weight:700}
-.algo-card .cmplx{font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:.15rem}
-
-.algo-card[data-algo="naive"].selected{border-color:var(--algo-naive);background:rgba(79, 70, 229, .08)}
-.algo-card[data-algo="rabin-karp"].selected{border-color:var(--algo-rk);background:rgba(219, 39, 119, .08)}
-.algo-card[data-algo="kmp"].selected{border-color:var(--algo-kmp);background:rgba(5, 150, 105, .08)}
-.algo-card[data-algo="boyer-moore"].selected{border-color:var(--algo-bm);background:rgba(234, 88, 12, .08)}
-
-/* buttons */
-.btn-row{display:flex;gap:.5rem}
-.btn{
-  flex:1;
-  padding:.65rem;
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-  font-family:var(--sans);
-  font-size:.8rem;
-  font-weight:600;
-  cursor:pointer;
-  transition:all .2s;
+.btn-p  { background: var(--acento); border-color: var(--acento); color: #fff; }
+.btn-p:hover { background: #4338ca; transform: translateY(-1px); }
+.btn-s  { background: var(--superficie); color: var(--texto); border-color: var(--borda); }
+.btn-s:hover { background: var(--superficie2); border-color: var(--borda2); }
+.btn-cmp {
+  width: 100%;
+  background: linear-gradient(135deg,rgba(79, 70, 229,.1),rgba(147, 51, 234,.1));
+  border: 1px solid rgba(79, 70, 229,.2); color: var(--acento2);
 }
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn-primary:hover{background:#4338ca;border-color:#4338ca;transform:translateY(-1px)}
-.btn-outline{background:var(--surface);color:var(--text)}
-.btn-outline:hover{background:var(--surface2);border-color:var(--border2)}
-.btn-compare{
-  width:100%;background:linear-gradient(135deg,rgba(79, 70, 229, .1),rgba(147, 51, 234, .1));
-  border:1px solid rgba(79, 70, 229, .3);color:var(--accent2);
+.btn-cmp:hover { background: linear-gradient(135deg,rgba(79, 70, 229,.15),rgba(147, 51, 234,.15)); transform: translateY(-1px); }
+.btn:disabled { opacity: .38; cursor: not-allowed; transform: none !important; }
+
+/* ── conteúdo ────────────────────────────────────────────── */
+.conteudo { overflow-y: auto; display: flex; flex-direction: column; }
+.abas {
+  display: flex; border-bottom: 1px solid var(--borda); padding: 0 1.4rem;
+  background: var(--superficie); position: sticky; top: 0; z-index: 50;
 }
-.btn-compare:hover{background:linear-gradient(135deg,rgba(79, 70, 229, .15),rgba(147, 51, 234, .15));transform:translateY(-1px)}
-.btn:disabled{opacity:.6;cursor:not-allowed;transform:none!important}
-
-/*  ÁREA DE CONTEÚDO */
-.content{overflow-y:auto;display:flex;flex-direction:column}
-
-/* guias */
-.tabs{
-  display:flex;gap:0;border-bottom:1px solid var(--border);
-  padding:0 1.5rem;background:var(--surface);position:sticky;top:0;z-index:50;
+.aba {
+  padding: .8rem 1.1rem; font-size: .78rem; font-weight: 700; cursor: pointer;
+  border-bottom: 2px solid transparent; color: var(--muted); transition: all .2s; white-space: nowrap;
 }
-.tab{
-  padding:.85rem 1.2rem;
-  font-size:.8rem;
-  font-weight:600;
-  cursor:pointer;
-  border-bottom:2px solid transparent;
-  color:var(--muted);transition:all .2s;
-  white-space:nowrap;
+.aba:hover { color: var(--texto); }
+.aba.ativa { color: var(--acento); border-bottom-color: var(--acento); }
+.painel { display: none; padding: 1.4rem; flex: 1; flex-direction: column; gap: 1.3rem; }
+.painel.ativo { display: flex; }
+
+/* ── cards ───────────────────────────────────────────────── */
+.card {
+  background: var(--superficie); border: 1px solid var(--borda);
+  border-radius: var(--raio-lg); padding: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.cab-card { display: flex; align-items: center; gap: .7rem; margin-bottom: .95rem; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.titulo-card { font-size: .88rem; font-weight: 700; }
+.badge-card { font-family: var(--mono); font-size: .6rem; padding: .14rem .48rem; border-radius: 4px; margin-left: auto; }
 
-.tab-pane{display:none;padding:1.5rem;flex:1;flex-direction:column;gap:1.5rem}
-.tab-pane.active{display:flex}
+/* ── métricas ────────────────────────────────────────────── */
+.metricas { display: flex; gap: .65rem; flex-wrap: wrap; margin-bottom: .9rem; }
+.metrica { background: var(--superficie2); border: 1px solid var(--borda); border-radius: 8px; padding: .45rem .7rem; flex: 1; min-width: 85px; }
+.metrica .val { font-family: var(--mono); font-size: .95rem; font-weight: 800; color: var(--texto); }
+.metrica .rot { font-size: .6rem; color: var(--muted); margin-top: .08rem; }
 
-/* cards de resultados */
-.result-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
-  padding:1.25rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+/* ── posições ────────────────────────────────────────────── */
+.posicoes { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .7rem; }
+.chip { font-family: var(--mono); font-size: .68rem; font-weight: 600; padding: .18rem .48rem; border-radius: 5px; background: rgba(16, 185, 129,.1); color: var(--verde); border: 1px solid rgba(16, 185, 129,.2); }
+.sem-match { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.linha-cx { display: flex; gap: .45rem; flex-wrap: wrap; }
+.badge-cx { font-family: var(--mono); font-size: .63rem; padding: .18rem .5rem; border-radius: 5px; border: 1px solid var(--borda2); color: var(--muted); background: var(--superficie2); }
+.badge-cx span { font-weight: 700; color: var(--ciano); }
+
+/* ── visualizador texto ──────────────────────────────────── */
+.vis-txt {
+  font-family: var(--mono); font-size: .76rem; line-height: 2.1; word-break: break-all;
+  background: var(--superficie2); border: 1px solid var(--borda);
+  border-radius: var(--raio); padding: .9rem; max-height: 175px; overflow-y: auto; color: var(--texto);
 }
-.result-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
-.algo-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.result-title{font-size:.9rem;font-weight:700}
-.result-badge{
-  font-family:var(--mono);font-size:.62rem;
-  padding:.15rem .5rem;border-radius:4px;margin-left:auto;
+.ch { display: inline; padding: 0 1px; border-radius: 2px; cursor: default; transition: background .08s; }
+.ch.janela    { background: rgba(79, 70, 229,.15); }
+.ch.encontrou { background: var(--verde) !important; color: #fff !important; font-weight: 700; }
+.ch.falhou    { background: rgba(239, 68, 68,.15) !important; color: var(--vermelho) !important; }
+
+/* ── visualizador padrão ─────────────────────────────────── */
+.vis-pad { display: flex; gap: 2px; margin-top: .45rem; flex-wrap: wrap; }
+.cp {
+  width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: .73rem; font-weight: 600;
+  border: 1px solid var(--borda2); border-radius: 5px; background: var(--superficie2); transition: all .12s; color: var(--texto);
 }
+.cp.encontrou { background: var(--verde);            border-color: var(--verde);    color: #fff; }
+.cp.falhou    { background: rgba(239, 68, 68,.15);   border-color: rgba(239, 68, 68,.3); color: var(--vermelho); }
 
-/* linha de métricas */
-.metrics{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
-.metric{
-  background:var(--surface2);border:1px solid var(--border);
-  border-radius:8px;padding:.5rem .75rem;flex:1;min-width:90px;
+/* ── log ─────────────────────────────────────────────────── */
+.log {
+  font-family: var(--mono); font-size: .7rem; background: var(--superficie2);
+  border: 1px solid var(--borda); border-radius: var(--raio);
+  max-height: 190px; overflow-y: auto; padding: .7rem;
 }
-.metric .val{font-family:var(--mono);font-size:1rem;font-weight:800;color:var(--text)}
-.metric .lbl{font-size:.62rem;color:var(--muted);margin-top:.1rem}
+.log-linha { padding: .28rem .45rem; border-radius: 5px; margin-bottom: .18rem; display: flex; align-items: flex-start; gap: .45rem; }
+.log-linha.ok   { background: rgba(16, 185, 129,.1); color: #059669; }
+.log-linha.fail { background: rgba(239, 68, 68,.1); color: #dc2626; }
+.log-linha.info { background: rgba(14, 165, 233,.1);  color: #0284c7; }
+.num-p { color: var(--muted); min-width: 3ch; text-align: right; flex-shrink: 0; }
 
-/* posições */
-.positions{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem}
-.pos-chip{
-  font-family:var(--mono);font-size:.7rem;font-weight:600;
-  padding:.2rem .5rem;border-radius:5px;
-  background:rgba(5, 150, 105, .1);color:var(--green);border:1px solid rgba(5, 150, 105, .2);
+/* ── controles passo ─────────────────────────────────────── */
+.ctrl-passo { display: flex; align-items: center; gap: .65rem; }
+.slider {
+  flex: 1; appearance: none; height: 4px; border-radius: 2px; background: var(--borda2); outline: none;
 }
-.no-match{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.slider::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--acento); cursor: pointer; border: none; }
+.cnt-passo { font-family: var(--mono); font-size: .7rem; color: var(--muted); white-space: nowrap; }
 
-/* complexidade */
-.complexity-row{display:flex;gap:.5rem;flex-wrap:wrap}
-.cmplx-badge{
-  font-family:var(--mono);font-size:.65rem;padding:.2rem .55rem;border-radius:5px;
-  border:1px solid var(--border2);color:var(--muted);background:var(--surface2);
-}
-.cmplx-badge span{font-weight:700;color:var(--cyan)}
+/* ── tabelas ─────────────────────────────────────────────── */
+.tbl { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: .7rem; }
+.tbl th { background: var(--superficie2); padding: .38rem .55rem; text-align: left; color: var(--muted); border: 1px solid var(--borda); font-weight: 600; }
+.tbl td { padding: .32rem .55rem; border: 1px solid var(--borda); color: var(--texto); }
+.tbl tr:hover td { background: rgba(79, 70, 229,.03); }
 
-/* VER TEXTO */
-.text-vis{
-  font-family:var(--mono);font-size:.78rem;line-height:2;
-  word-break:break-all;background:var(--surface2);
-  border:1px solid var(--border);border-radius:var(--radius);
-  padding:1rem;max-height:180px;overflow-y:auto;
-}
-.char{
-  display:inline;padding:0 1px;border-radius:2px;transition:background .1s,color .1s;
-  cursor:default;
-}
-.char.hi-window{background:rgba(79, 70, 229, .15)}
-.char.hi-match{background:var(--green)!important;color:#fff!important;font-weight:700}
-.char.hi-mismatch{background:rgba(220, 38, 38, .15)!important;color:var(--red)!important}
-.char.hi-current{background:var(--yellow)!important;color:#fff!important;font-weight:700;animation:pulse .6s ease infinite alternate}
+/* ── comparação ──────────────────────────────────────────── */
+.grade-cmp { display: grid; grid-template-columns: repeat(2,1fr); gap: .95rem; }
+.card-cmp { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 1.05rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.titulo-cmp { font-size: .78rem; font-weight: 700; margin-bottom: .7rem; }
+.barras { display: flex; flex-direction: column; gap: .4rem; }
+.linha-barra { display: flex; align-items: center; gap: .55rem; }
+.lbl-barra { font-family: var(--mono); font-size: .62rem; color: var(--muted); width: 95px; flex-shrink: 0; text-align: right; }
+.trilha { flex: 1; background: var(--superficie2); border-radius: 4px; height: 18px; overflow: hidden; border: 1px solid var(--borda); }
+.preench { height: 100%; border-radius: 4px; transition: width .55s cubic-bezier(.23,1,.32,1); display: flex; align-items: center; padding: 0 .38rem; }
+.val-barra { font-family: var(--mono); font-size: .58rem; font-weight: 700; color: #fff; white-space: nowrap; }
 
-/* padrão visual */
-.pattern-vis{display:flex;gap:2px;margin-top:.5rem;flex-wrap:wrap}
-.pchar{
-  width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:.75rem;font-weight:600;
-  border:1px solid var(--border2);border-radius:5px;background:var(--surface2);
-  transition:all .15s;
-}
-.pchar.hi-match{background:var(--green);border-color:var(--green);color:#fff}
-.pchar.hi-mismatch{background:rgba(220, 38, 38, .15);border-color:var(--red);color:var(--red)}
-.pchar.hi-current{background:var(--yellow);border-color:var(--yellow);color:#fff}
+/* ── vazio / loader ──────────────────────────────────────── */
+.vazio { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; color: var(--muted); gap: .7rem; text-align: center; flex: 1; }
+.vazio-i { font-size: 2.4rem; opacity: .4; }
+.vazio-t { font-size: .83rem; }
+.loader { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(0,0,0,.1); border-top-color: currentColor; border-radius: 50%; animation: girar .7s linear infinite; }
 
-/* registro de etapas */
-.step-log{
-  font-family:var(--mono);font-size:.72rem;background:var(--surface2);
-  border:1px solid var(--border);border-radius:var(--radius);
-  max-height:200px;overflow-y:auto;padding:.75rem;
-}
-.step-entry{
-  padding:.3rem .5rem;border-radius:5px;margin-bottom:.2rem;
-  display:flex;align-items:flex-start;gap:.5rem;
-}
-.step-entry.ok{background:rgba(5, 150, 105, .1);color:var(--green)}
-.step-entry.fail{background:rgba(220, 38, 38, .1);color:var(--red)}
-.step-entry.info{background:rgba(2, 132, 199, .1);color:var(--cyan)}
-.step-num{color:var(--muted);min-width:3ch;text-align:right;flex-shrink:0}
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes surgir { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+.surgir { animation: surgir .28s ease both; }
 
-/* controles de etapa */
-.step-ctrl{display:flex;align-items:center;gap:.75rem}
-.step-slider{flex:1;appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none}
-.step-slider::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
-.step-count{font-family:var(--mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
-
-/*  tabelas extras */
-.extra-table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:.72rem}
-.extra-table th{background:var(--surface2);padding:.4rem .6rem;text-align:left;color:var(--muted);border:1px solid var(--border)}
-.extra-table td{padding:.35rem .6rem;border:1px solid var(--border)}
-.extra-table tr:hover td{background:rgba(79, 70, 229, .04)}
-
-/* ABA DE COMPARAÇÃO  */
-.compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
-.cmp-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
-  padding:1.1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-.cmp-title{font-size:.8rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
-
-/* gráfico de barras */
-.bar-chart{display:flex;flex-direction:column;gap:.45rem}
-.bar-row{display:flex;align-items:center;gap:.6rem}
-.bar-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);width:100px;flex-shrink:0;text-align:right}
-.bar-track{flex:1;background:var(--surface2);border-radius:4px;height:18px;overflow:hidden;border:1px solid var(--border)}
-.bar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.23,1,.32,1);display:flex;align-items:center;padding:0 .4rem}
-.bar-val{font-family:var(--mono);font-size:.6rem;font-weight:700;color:#fff;white-space:nowrap}
-
-/* VAZIO / ESPAÇO RESERVADO  */
-.empty{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:3rem;color:var(--muted);gap:.75rem;text-align:center;flex:1;
-}
-.empty-icon{font-size:2.5rem;opacity:.4}
-.empty-text{font-size:.85rem}
-
-/*  LOADER  */
-.loader{
-  display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
-  border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{from{opacity:1}to{opacity:.6}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.fade-in{animation:fadeIn .3s ease both}
-
-/* RESPONSIVIDADE */
-@media(max-width:900px){
-  .main{grid-template-columns:1fr}
-  .sidebar{max-height:50vh}
-  .compare-grid{grid-template-columns:1fr}
+@media (max-width: 860px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { max-height: 48vh; }
+  .grade-cmp { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -321,143 +240,119 @@ textarea{min-height:110px;max-height:220px}
 
 <header>
   <div>
-    <div class="logo">Busca<span>String</span>Lab</div>
-    <div class="logo-sub">algoritmos de busca em strings · Padrão Strategy</div>
+    <div class="logo">String<span>Busca</span>Lab</div>
+    <div class="logo-sub">Algoritmos de Busca em strings · Padrão Strategy</div>
   </div>
-  <div class="spacer"></div>
+  <div class="espaco"></div>
 </header>
 
 <div class="main">
 
 <aside class="sidebar">
 
-<div>
-  <div class="section-label">Texto fonte</div>
-  <div class="upload-zone" id="upload-zone">
-    <label for="file-input" class="upload-click">
-      <div class="upload-icon">📁</div>
-      <div class="upload-text">Clique para selecionar <strong>.txt</strong></div>
+  <div>
+    <div class="sec-titulo">Texto fonte</div>
+    <label class="zona-upload" id="zona-upload">
+      <input type="file" id="input-arq" accept=".txt" multiple>
+      <div class="upload-icone">📁</div>
+      <div class="upload-txt">Clique ou arraste arquivos <strong>.txt</strong></div>
+      <div id="lista-arq"></div>
     </label>
-    <input type="file" id="file-input" accept=".txt" multiple hidden>
-    <div id="file-list"></div>
-  </div>
-  <div style="margin:.5rem 0;text-align:center;font-size:.65rem;color:var(--muted)">— ou —</div>
-  <label class="input-label">Digitar texto manualmente</label>
-  <textarea id="text-input" placeholder="Cole ou digite o texto aqui…" rows="4"></textarea>
-
-  <div style="margin-top:.3rem;font-family:var(--mono);font-size:.65rem;color:var(--muted)" id="text-len">0 caracteres</div>
-</div>
-
-  <div>
-    <div class="section-label">Padrão</div>
-    <label class="input-label">String a buscar</label>
-    <input type="text" id="pattern-input" placeholder="Ex: abacate">
-    <div style="margin-top:.3rem;font-family:var(--mono);font-size:.65rem;color:var(--muted)" id="pat-len">0 caracteres</div>
+    <div style="margin:.45rem 0;text-align:center;font-size:.62rem;color:var(--muted)">— ou —</div>
+    <label class="lbl">Digitar texto manualmente</label>
+    <textarea id="input-txt" placeholder="Cole ou digite o texto aqui…" rows="4"></textarea>
+    <div id="tam-txt" style="margin-top:.28rem;font-family:var(--mono);font-size:.62rem;color:var(--muted)">0 caracteres</div>
   </div>
 
   <div>
-    <div class="section-label">Algoritmo</div>
-    <div class="algo-grid" id="algo-grid">
-      <div class="algo-card selected" data-algo="naive">
-        <div class="name">Naive</div>
-        <div class="cmplx">O(n·m)</div>
+    <div class="sec-titulo">Padrão de busca</div>
+    <label class="lbl">String a buscar no texto</label>
+    <input type="text" id="input-pad" placeholder="Ex: abab">
+    <div id="tam-pad" style="margin-top:.28rem;font-family:var(--mono);font-size:.62rem;color:var(--muted)">0 caracteres</div>
+  </div>
+
+  <div>
+    <div class="sec-titulo">Algoritmo</div>
+    <div class="grade-algos" id="grade-algos">
+      <div class="card-algo sel" data-algo="naive">
+        <div class="nome">Naive</div><div class="cmplx">O(n·m)</div>
       </div>
-      <div class="algo-card" data-algo="rabin-karp">
-        <div class="name">Rabin-Karp</div>
-        <div class="cmplx">O(n+m)</div>
+      <div class="card-algo" data-algo="rabin-karp">
+        <div class="nome">Rabin-Karp</div><div class="cmplx">O(n+m)</div>
       </div>
-      <div class="algo-card" data-algo="kmp">
-        <div class="name">KMP</div>
-        <div class="cmplx">O(n+m)</div>
+      <div class="card-algo" data-algo="kmp">
+        <div class="nome">KMP</div><div class="cmplx">O(n+m)</div>
       </div>
-      <div class="algo-card" data-algo="boyer-moore">
-        <div class="name">Boyer-Moore</div>
-        <div class="cmplx">O(n/m)</div>
+      <div class="card-algo" data-algo="boyer-moore">
+        <div class="nome">Boyer-Moore</div><div class="cmplx">O(n/m)</div>
       </div>
     </div>
   </div>
 
   <div>
-    <div class="section-label">Executar</div>
-    <div class="btn-row" style="margin-bottom:.5rem">
-      <button class="btn btn-primary" id="btn-run">▶ Executar</button>
-      <button class="btn btn-outline" id="btn-step">⏩ Passo a passo</button>
+    <div class="sec-titulo">Executar</div>
+    <div class="linha-btn" style="margin-bottom:.45rem">
+      <button class="btn btn-p" id="btn-exec">▶ Executar</button>
+      <button class="btn btn-s" id="btn-passo">⏩ Passo a passo</button>
     </div>
-    <button class="btn btn-compare" id="btn-compare">⚡ Comparar todos os algoritmos</button>
+    <button class="btn btn-cmp" id="btn-cmp">⚡ Comparar todos os algoritmos</button>
   </div>
 
 </aside>
 
-<main class="content">
+<main class="conteudo">
 
-  <div class="tabs">
-    <div class="tab active" data-tab="result">Resultado</div>
-    <div class="tab" data-tab="stepbystep">Passo a Passo</div>
-    <div class="tab" data-tab="tables">Tabelas Internas</div>
-    <div class="tab" data-tab="compare">Comparação</div>
+  <div class="abas">
+    <div class="aba ativa" data-aba="resultado">Resultado</div>
+    <div class="aba" data-aba="passos">Passo a Passo</div>
+    <div class="aba" data-aba="tabelas">Tabelas Internas</div>
+    <div class="aba" data-aba="comparacao">Comparação</div>
   </div>
 
-  <div class="tab-pane active" id="tab-result">
-    <div class="empty" id="result-empty">
-      <div class="empty-icon">🔍</div>
-      <div class="empty-text">Execute uma busca para ver os resultados</div>
-    </div>
-    <div id="result-content" style="display:none;flex-direction:column;gap:1rem"></div>
+  <div class="painel ativo" id="painel-resultado">
+    <div class="vazio" id="vazio-res"><div class="vazio-i">🔍</div><div class="vazio-t">Execute uma busca para ver os resultados</div></div>
+    <div id="cont-res" style="display:none;flex-direction:column;gap:1rem"></div>
   </div>
 
-  <div class="tab-pane" id="tab-stepbystep">
-    <div class="empty" id="step-empty">
-      <div class="empty-icon">⏯️</div>
-      <div class="empty-text">Clique em "Passo a Passo" para visualizar a execução</div>
-    </div>
-    <div id="step-content" style="display:none;flex-direction:column;gap:1rem">
-      <div class="result-card">
-        <div class="result-header">
-          <span class="algo-dot" id="step-dot"></span>
-          <span class="result-title" id="step-algo-name"></span>
-          <span class="step-count" id="step-count-label" style="margin-left:auto"></span>
+  <div class="painel" id="painel-passos">
+    <div class="vazio" id="vazio-pas"><div class="vazio-i">⏯️</div><div class="vazio-t">Clique em "Passo a Passo" para visualizar a execução do algoritmo</div></div>
+    <div id="cont-pas" style="display:none;flex-direction:column;gap:1rem">
+      <div class="card">
+        <div class="cab-card">
+          <span class="dot" id="dot-pas"></span>
+          <span class="titulo-card" id="nome-pas"></span>
+          <span class="cnt-passo" id="cnt-pas" style="margin-left:auto"></span>
         </div>
-
-        <div class="step-ctrl" style="margin-bottom:1rem">
-          <button class="btn btn-outline" id="step-prev" style="flex:0;padding:.4rem .75rem;font-size:.8rem">◀</button>
-          <input type="range" class="step-slider" id="step-slider" min="0" value="0">
-          <button class="btn btn-outline" id="step-next" style="flex:0;padding:.4rem .75rem;font-size:.8rem">▶</button>
-          <button class="btn btn-primary" id="step-play" style="flex:0;padding:.4rem .85rem;font-size:.8rem">▶ Auto</button>
+        <div class="ctrl-passo" style="margin-bottom:.9rem">
+          <button class="btn btn-s" id="btn-ant" style="flex:0;padding:.38rem .7rem;font-size:.78rem">◀</button>
+          <input type="range" class="slider" id="slider" min="0" value="0">
+          <button class="btn btn-s" id="btn-prox" style="flex:0;padding:.38rem .7rem;font-size:.78rem">▶</button>
+          <button class="btn btn-p" id="btn-rep" style="flex:0;padding:.38rem .8rem;font-size:.78rem">▶ Auto</button>
         </div>
-
-        <div class="section-label">Texto</div>
-        <div class="text-vis" id="text-vis"></div>
-
-        <div class="section-label" style="margin-top:.75rem">Padrão</div>
-        <div class="pattern-vis" id="pattern-vis"></div>
+        <div class="sec-titulo">Texto</div>
+        <div class="vis-txt" id="vis-txt"></div>
+        <div class="sec-titulo" style="margin-top:.7rem">Padrão</div>
+        <div class="vis-pad" id="vis-pad"></div>
       </div>
-
-      <div class="result-card">
-        <div class="section-label">Log do passo atual</div>
-        <div class="step-log" id="step-log"></div>
+      <div class="card">
+        <div class="sec-titulo">Log do passo atual</div>
+        <div class="log" id="log-pas"></div>
       </div>
-
-      <div class="result-card">
-        <div class="section-label">Métricas parciais</div>
-        <div class="metrics" id="step-metrics"></div>
+      <div class="card">
+        <div class="sec-titulo">Métricas parciais</div>
+        <div class="metricas" id="met-pas"></div>
       </div>
     </div>
   </div>
 
-  <div class="tab-pane" id="tab-tables">
-    <div class="empty" id="tables-empty">
-      <div class="empty-icon">📊</div>
-      <div class="empty-text">Execute um algoritmo para ver suas tabelas internas</div>
-    </div>
-    <div id="tables-content" style="display:none;flex-direction:column;gap:1rem"></div>
+  <div class="painel" id="painel-tabelas">
+    <div class="vazio" id="vazio-tab"><div class="vazio-i">📊</div><div class="vazio-t">Execute um algoritmo para ver suas tabelas internas</div></div>
+    <div id="cont-tab" style="display:none;flex-direction:column;gap:1rem"></div>
   </div>
 
-  <div class="tab-pane" id="tab-compare">
-    <div class="empty" id="compare-empty">
-      <div class="empty-icon">⚡</div>
-      <div class="empty-text">Clique em "Comparar todos" para ver a análise comparativa</div>
-    </div>
-    <div id="compare-content" style="display:none;flex-direction:column;gap:1rem"></div>
+  <div class="painel" id="painel-comparacao">
+    <div class="vazio" id="vazio-cmp"><div class="vazio-i">⚡</div><div class="vazio-t">Clique em "Comparar todos" para ver a análise comparativa</div></div>
+    <div id="cont-cmp" style="display:none;flex-direction:column;gap:1rem"></div>
   </div>
 
 </main>
@@ -465,580 +360,722 @@ textarea{min-height:110px;max-height:220px}
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════════════
+//  ALGORITMOS DE BUSCA EM STRINGS — implementados em JavaScript
+//  NÃO CONSEGUI FAZER UM FRONT COM PYTHON PROFESSOR ENTÃO FIZ A ATIVIDADE EM PYTHON, 
+//  MAS PEDI PRA IA COLOCAR EM JS PRA MOSTRAR EM HTML
+//
+//  Interface esperada por cada algoritmo:
+//    algoritmo.nome           → string com o nome
+//    algoritmo.complexidade   → { melhor, medio, pior }
+//    algoritmo.buscar(texto, padrao) → ResultadoBusca
+//
+//  ResultadoBusca = {
+//    algoritmo, posicoes, comparacoes, tempo_ms,
+//    tamanho_texto, tamanho_padrao, complexidade,
+//    tabelas_extras, passos: [{ numero, posicao_texto,
+//      posicao_padrao, descricao, houve_match,
+//      destaque_texto, destaque_padrao, dados_extras }]
+//  }
+// ══════════════════════════════════════════════════════════════
 
-//  ESTADO
-const state = {
-  algo: 'naive',
-  lastResult: null,
-  stepData: null,
-  stepIndex: 0,
-  playTimer: null,
-  compareResults: [],
+// ── Helper: monta o objeto de resultado ─────────────────────
+function montarResultado(nome, cx, texto, padrao, posicoes, comparacoes, passos, tempoMs, tabelasExtras = {}) {
+  return {
+    algoritmo: nome,
+    posicoes,
+    comparacoes,
+    tempo_ms: +tempoMs.toFixed(4),
+    tamanho_texto: texto.length,
+    tamanho_padrao: padrao.length,
+    complexidade: cx,
+    tabelas_extras: tabelasExtras,
+    passos,
+    // guardamos texto e padrão para o visualizador
+    _texto: texto,
+    _padrao: padrao,
+  };
+}
+
+const BuscaNaive = {
+  nome: 'Naive',
+  complexidade: { melhor: 'O(n)', medio: 'O(n·m)', pior: 'O(n·m)' },
+
+  buscar(texto, padrao) {
+    const n = texto.length, m = padrao.length;
+    const posicoes = [], passos = [];
+    let comparacoes = 0, numPasso = 0;
+    const t0 = performance.now();
+
+    if (m === 0 || n === 0) return montarResultado(this.nome, this.complexidade, texto, padrao, [], 0, [], performance.now() - t0);
+
+    for (let inicio = 0; inicio <= n - m; inicio++) {
+      // Tenta casar o padrão inteiro a partir de 'inicio'
+      let j = 0;
+      while (j < m) {
+        comparacoes++;
+        const cTxt = texto[inicio + j];
+        const cPad = padrao[j];
+        const ok   = cTxt === cPad;
+
+        passos.push({
+          numero: numPasso++,
+          posicao_texto:  inicio + j,
+          posicao_padrao: j,
+          descricao: `texto[${inicio + j}]='${cTxt}' vs padrão[${j}]='${cPad}'`,
+          houve_match:    ok,
+          destaque_texto: range(inicio, inicio + m),
+          destaque_padrao: range(0, j + 1),
+          dados_extras: { inicio_janela: inicio },
+        });
+
+        if (!ok) break; // falhou → próxima janela
+        j++;
+      }
+      if (j === m) posicoes.push(inicio); // chegou até o fim → encontrou!
+    }
+
+    return montarResultado(this.nome, this.complexidade, texto, padrao, posicoes, comparacoes, passos, performance.now() - t0);
+  }
 };
 
-const ALGO_COLORS = {
-  'naive':       'var(--algo-naive)',
-  'rabin-karp':  'var(--algo-rk)',
-  'kmp':         'var(--algo-kmp)',
-  'boyer-moore': 'var(--algo-bm)',
+const BuscaRabinKarp = {
+  nome: 'Rabin-Karp',
+  complexidade: { melhor: 'O(n+m)', medio: 'O(n+m)', pior: 'O(n·m)' },
+  BASE: 256,
+  MOD: 101,
+
+  buscar(texto, padrao) {
+    const n = texto.length, m = padrao.length;
+    const B = this.BASE, MOD = this.MOD;
+    const posicoes = [], passos = [], hashes = [];
+    let comparacoes = 0, numPasso = 0;
+    const t0 = performance.now();
+
+    if (m === 0 || n === 0 || m > n) return montarResultado(this.nome, this.complexidade, texto, padrao, [], 0, [], performance.now() - t0);
+
+    // h = B^(m-1) mod MOD — usado para remover o primeiro char da janela
+    let h = 1;
+    for (let i = 0; i < m - 1; i++) h = (h * B) % MOD;
+
+    // Hash inicial do padrão e da primeira janela
+    let hashPad = 0, hashJan = 0;
+    for (let i = 0; i < m; i++) {
+      hashPad = (B * hashPad + padrao.charCodeAt(i)) % MOD;
+      hashJan = (B * hashJan + texto.charCodeAt(i))  % MOD;
+    }
+    hashes.push({ janela: 0, hash_texto: hashJan, hash_padrao: hashPad });
+
+    for (let i = 0; i <= n - m; i++) {
+      const iguais = hashJan === hashPad;
+      const info   = { hash_texto: hashJan, hash_padrao: hashPad, hashes_iguais: iguais, inicio_janela: i };
+
+      if (iguais) {
+        // Hashes iguais → confirma char a char
+        let j = 0;
+        while (j < m) {
+          comparacoes++;
+          const cTxt = texto[i + j], cPad = padrao[j], ok = cTxt === cPad;
+          passos.push({
+            numero: numPasso++,
+            posicao_texto:  i + j,
+            posicao_padrao: j,
+            descricao: `[Hash igual!] Confirmando: texto[${i+j}]='${cTxt}' vs padrão[${j}]='${cPad}'`,
+            houve_match:    ok,
+            destaque_texto: range(i, i + m),
+            destaque_padrao: range(0, j + 1),
+            dados_extras: info,
+          });
+          if (!ok) break;
+          j++;
+        }
+        if (j === m) posicoes.push(i);
+      } else {
+        // Hashes diferentes → pula sem verificar chars
+        passos.push({
+          numero: numPasso++,
+          posicao_texto:  i,
+          posicao_padrao: 0,
+          descricao: `Hash diferente na janela ${i}: texto=${hashJan} ≠ padrão=${hashPad} → pula`,
+          houve_match:    false,
+          destaque_texto: range(i, i + m),
+          destaque_padrao: [],
+          dados_extras: info,
+        });
+      }
+
+      // Atualiza o hash (rolling hash em O(1))
+      if (i < n - m) {
+        hashJan = (B * (hashJan - texto.charCodeAt(i) * h) + texto.charCodeAt(i + m)) % MOD;
+        if (hashJan < 0) hashJan += MOD;
+        hashes.push({ janela: i + 1, hash_texto: hashJan, hash_padrao: hashPad });
+      }
+    }
+
+    const tabelasExtras = { hashes, base: B, mod: MOD, hash_padrao: hashPad };
+    return montarResultado(this.nome, this.complexidade, texto, padrao, posicoes, comparacoes, passos, performance.now() - t0, tabelasExtras);
+  }
 };
-const ALGO_NAMES = {
-  'naive':       'Naive (Força Bruta)',
+
+
+const BuscaKMP = {
+  nome: 'KMP',
+  complexidade: { melhor: 'O(n)', medio: 'O(n+m)', pior: 'O(n+m)' },
+
+  // Constrói a tabela LPS em O(m)
+  construirLPS(padrao) {
+    const m = padrao.length;
+    const lps = new Array(m).fill(0);
+    let comp = 0, i = 1; // comp = comprimento do prefixo atual
+
+    while (i < m) {
+      if (padrao[i] === padrao[comp]) {
+        lps[i++] = ++comp;          // extende o prefixo-sufixo
+      } else if (comp !== 0) {
+        comp = lps[comp - 1];       // tenta prefixo menor
+      } else {
+        lps[i++] = 0;               // nenhum prefixo possível
+      }
+    }
+    return lps;
+  },
+
+  buscar(texto, padrao) {
+    const n = texto.length, m = padrao.length;
+    const posicoes = [], passos = [];
+    let comparacoes = 0, numPasso = 0;
+    const t0 = performance.now();
+
+    if (m === 0 || n === 0) return montarResultado(this.nome, this.complexidade, texto, padrao, [], 0, [], performance.now() - t0);
+
+    const lps = this.construirLPS(padrao);
+    let i = 0, j = 0; // i = cursor no texto, j = cursor no padrão
+
+    while (i < n) {
+      comparacoes++;
+      const cTxt = texto[i], cPad = padrao[j], ok = cTxt === cPad;
+      const saltoLPS = (!ok && j > 0) ? lps[j - 1] : null;
+
+      passos.push({
+        numero: numPasso++,
+        posicao_texto:  i,
+        posicao_padrao: j,
+        descricao: `texto[${i}]='${cTxt}' vs padrão[${j}]='${cPad}' | LPS[${j}]=${lps[j]}`,
+        houve_match:    ok,
+        destaque_texto: [i],
+        destaque_padrao: [j],
+        dados_extras: { lps: lps.slice(), i, j, salto_lps: saltoLPS },
+      });
+
+      if (ok) {
+        i++; j++; // avança nos dois
+      } else {
+        j = (j !== 0) ? lps[j - 1] : 0; // salta pelo LPS
+        if (j === 0 && !ok) i++;         // nem o primeiro casou → avança no texto
+      }
+
+      if (j === m) {            // chegou ao fim do padrão → encontrou!
+        posicoes.push(i - j);
+        j = lps[j - 1];        // prepara para próxima ocorrência
+      }
+    }
+
+    const tabelasExtras = {
+      lps: lps.map((v, idx) => ({ indice: idx, char: padrao[idx], valor_lps: v }))
+    };
+    return montarResultado(this.nome, this.complexidade, texto, padrao, posicoes, comparacoes, passos, performance.now() - t0, tabelasExtras);
+  }
+};
+
+const BuscaBoyerMoore = {
+  nome: 'Boyer-Moore',
+  complexidade: { melhor: 'O(n/m)', medio: 'O(n)', pior: 'O(n·m)' },
+
+  // Tabela: char → último índice no padrão (-1 se ausente)
+  construirTabelaMC(padrao) {
+    const tabela = {};
+    for (let i = 0; i < padrao.length; i++) tabela[padrao[i]] = i;
+    return tabela; // chars ausentes → .get retorna -1
+  },
+
+  buscar(texto, padrao) {
+    const n = texto.length, m = padrao.length;
+    const posicoes = [], passos = [];
+    let comparacoes = 0, numPasso = 0;
+    const t0 = performance.now();
+
+    if (m === 0 || n === 0 || m > n) return montarResultado(this.nome, this.complexidade, texto, padrao, [], 0, [], performance.now() - t0);
+
+    const tmc = this.construirTabelaMC(padrao);
+    let d = 0; // deslocamento do padrão sobre o texto
+
+    while (d <= n - m) {
+      let j = m - 1; // começa comparando pelo fim do padrão
+
+      while (j >= 0) {
+        comparacoes++;
+        const cTxt = texto[d + j], cPad = padrao[j], ok = cTxt === cPad;
+        const imc  = (tmc[cTxt] !== undefined) ? tmc[cTxt] : -1;
+
+        passos.push({
+          numero: numPasso++,
+          posicao_texto:  d + j,
+          posicao_padrao: j,
+          descricao: `texto[${d+j}]='${cTxt}' vs padrão[${j}]='${cPad}' (direita→esquerda)`,
+          houve_match:    ok,
+          destaque_texto: range(d, d + m),
+          destaque_padrao: [j],
+          dados_extras: { deslocamento: d, indice_mc: imc, mau_caractere: cTxt },
+        });
+
+        if (!ok) break; // achou o mau caractere
+        j--;
+      }
+
+      if (j < 0) {
+        // j = -1 → casou tudo → encontrou!
+        posicoes.push(d);
+        const prox = (d + m < n && tmc[texto[d + m]] !== undefined) ? tmc[texto[d + m]] : -1;
+        d += m - prox;
+      } else {
+        // Aplica a heurística do mau caractere
+        const imc = (tmc[texto[d + j]] !== undefined) ? tmc[texto[d + j]] : -1;
+        d += Math.max(1, j - imc);
+      }
+    }
+
+    const tabelasExtras = {
+      mau_caractere: Object.entries(tmc).sort().map(([ch, idx]) => ({ char: ch, ultimo_indice: idx }))
+    };
+    return montarResultado(this.nome, this.complexidade, texto, padrao, posicoes, comparacoes, passos, performance.now() - t0, tabelasExtras);
+  }
+};
+
+// ── Registro de algoritmos ────────
+const ALGORITMOS = {
+  'naive':       BuscaNaive,
+  'rabin-karp':  BuscaRabinKarp,
+  'kmp':         BuscaKMP,
+  'boyer-moore': BuscaBoyerMoore,
+};
+
+// ── Utilitários ──────────────────────────────────────────────
+function range(a, b) { const r = []; for (let i = a; i < b; i++) r.push(i); return r; }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g,'&nbsp;'); }
+
+const COR = {
+  'naive':       'var(--cor-naive)',
+  'rabin-karp':  'var(--cor-rabinkarp)',
+  'kmp':         'var(--cor-kmp)',
+  'boyer-moore': 'var(--cor-boyermoore)',
+};
+const NOME = {
+  'naive':       'Busca Naive (Força Bruta)',
   'rabin-karp':  'Rabin-Karp',
   'kmp':         'Knuth-Morris-Pratt (KMP)',
   'boyer-moore': 'Boyer-Moore',
 };
 
-//  AJUDANTES
-function getText()    { return document.getElementById('text-input').value; }
-function getPattern() { return document.getElementById('pattern-input').value; }
-function getAlgo()    { return state.algo; }
+const E = {
+  algoAtual:  'naive',
+  dadosPasso: null,
+  idx:        0,
+  timer:      null,
+  tocando:    false,
+};
 
-function showTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+function getTxt() { return document.getElementById('input-txt').value; }
+function getPad() { return document.getElementById('input-pad').value; }
+
+function mostrarAba(nome) {
+  document.querySelectorAll('.aba').forEach(a => a.classList.toggle('ativa', a.dataset.aba === nome));
+  document.querySelectorAll('.painel').forEach(p => p.classList.toggle('ativo', p.id === 'painel-' + nome));
 }
 
-function setLoading(btnId, loading) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  btn.disabled = loading;
-  btn._orig = btn._orig || btn.innerHTML;
-  btn.innerHTML = loading ? '<span class="loader"></span> Processando…' : btn._orig;
+function setLoad(id, on) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  b.disabled = on;
+  b._orig = b._orig || b.innerHTML;
+  b.innerHTML = on ? '<span class="loader"></span>' : b._orig;
 }
 
-async function apiPost(endpoint, body) {
-  const r = await fetch(endpoint, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(body),
-  });
-  return r.json();
+function criarCard(titulo, html) {
+  const d = document.createElement('div');
+  d.className = 'card surgir';
+  d.innerHTML = `<div class="sec-titulo" style="margin-bottom:.65rem">${titulo}</div>${html}`;
+  return d;
 }
 
-
-//  UPLOAD DO ARQUIVO
-const fileInput = document.getElementById('file-input');
-const fileList  = document.getElementById('file-list');
-const textInput = document.getElementById('text-input');
-
-fileInput.addEventListener('change', async () => {
-  const files = Array.from(fileInput.files);
-  const texts = await Promise.all(files.map(f => f.text()));
-  textInput.value = texts.join('\n');
-  fileList.textContent = files.map(f => '✓ ' + f.name).join('\n');
-  updateLengths();
+// ══════════════════════════════════════════════════════════════
+//  UPLOAD
+// ══════════════════════════════════════════════════════════════
+document.getElementById('input-arq').addEventListener('change', async function() {
+  const fs = Array.from(this.files);
+  document.getElementById('input-txt').value = (await Promise.all(fs.map(f => f.text()))).join('\n');
+  document.getElementById('lista-arq').textContent = fs.map(f => '✓ ' + f.name).join('\n');
+  atuTam();
 });
-
-// Drag & drop
-const zone = document.getElementById('upload-zone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; });
-zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
-zone.addEventListener('drop', async e => {
-  e.preventDefault(); zone.style.borderColor = '';
-  const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.txt'));
-  const texts = await Promise.all(files.map(f => f.text()));
-  textInput.value = texts.join('\n');
-  fileList.textContent = files.map(f => '✓ ' + f.name).join('\n');
-  updateLengths();
+const zona = document.getElementById('zona-upload');
+zona.addEventListener('dragover', e => { e.preventDefault(); zona.style.borderColor='var(--acento)'; });
+zona.addEventListener('dragleave', () => zona.style.borderColor='');
+zona.addEventListener('drop', async e => {
+  e.preventDefault(); zona.style.borderColor='';
+  const fs = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.txt'));
+  document.getElementById('input-txt').value = (await Promise.all(fs.map(f => f.text()))).join('\n');
+  document.getElementById('lista-arq').textContent = fs.map(f => '✓ ' + f.name).join('\n');
+  atuTam();
 });
-
-function updateLengths() {
-  document.getElementById('text-len').textContent = getText().length + ' caracteres';
-  document.getElementById('pat-len').textContent  = getPattern().length + ' caracteres';
+function atuTam() {
+  document.getElementById('tam-txt').textContent = getTxt().length + ' caracteres';
+  document.getElementById('tam-pad').textContent = getPad().length + ' caracteres';
 }
-textInput.addEventListener('input', updateLengths);
-document.getElementById('pattern-input').addEventListener('input', updateLengths);
+document.getElementById('input-txt').addEventListener('input', atuTam);
+document.getElementById('input-pad').addEventListener('input', atuTam);
 
+// ══════════════════════════════════════════════════════════════
+//  SELEÇÃO DE ALGORITMO
+// ══════════════════════════════════════════════════════════════
+document.getElementById('grade-algos').addEventListener('click', e => {
+  const c = e.target.closest('.card-algo');
+  if (!c) return;
+  document.querySelectorAll('.card-algo').forEach(x => x.classList.remove('sel'));
+  c.classList.add('sel');
+  E.algoAtual = c.dataset.algo;
+});
+document.querySelectorAll('.aba').forEach(a => a.addEventListener('click', () => mostrarAba(a.dataset.aba)));
 
-//  ALGO SELECTOR
-document.getElementById('algo-grid').addEventListener('click', e => {
-  const card = e.target.closest('.algo-card');
-  if (!card) return;
-  document.querySelectorAll('.algo-card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected');
-  state.algo = card.dataset.algo;
+// ══════════════════════════════════════════════════════════════
+//  EXECUTAR BUSCA
+// ══════════════════════════════════════════════════════════════
+document.getElementById('btn-exec').addEventListener('click', () => {
+  const txt = getTxt(), pad = getPad();
+  if (!txt || !pad) return alert('Preencha o texto e o padrão antes de executar.');
+  setLoad('btn-exec', true);
+  // setTimeout 0 para deixar o loader renderizar antes do cálculo
+  setTimeout(() => {
+    try {
+      const r = ALGORITMOS[E.algoAtual].buscar(txt, pad);
+      renderRes(r);
+      renderTab(r);
+      mostrarAba('resultado');
+    } finally { setLoad('btn-exec', false); }
+  }, 0);
 });
 
-//  GUIAS
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => showTab(tab.dataset.tab));
-});
-
-//  EXECUTAR PESQUISA
-document.getElementById('btn-run').addEventListener('click', async () => {
-  const text = getText(), pattern = getPattern();
-  if (!text || !pattern) return alert('Informe o texto e o padrão.');
-  setLoading('btn-run', true);
-  try {
-    const result = await apiPost('/api/search', { text, pattern, algorithm: getAlgo() });
-    state.lastResult = result;
-    renderResult(result);
-    renderTables(result);
-    showTab('result');
-  } catch(e) {
-    alert('Erro ao comunicar com o servidor Python. Inicie o server.py primeiro.');
-  } finally {
-    setLoading('btn-run', false);
-  }
-});
-
-
-//  RESULTADO DA RENDERIZAÇÃO
-function renderResult(r) {
-  const empty   = document.getElementById('result-empty');
-  const content = document.getElementById('result-content');
-  empty.style.display   = 'none';
-  content.style.display = 'flex';
-
-  const color = ALGO_COLORS[r.algorithm.toLowerCase().replace(' ','').replace('-','')] 
-    || ALGO_COLORS[Object.keys(ALGO_COLORS).find(k => r.algorithm.toLowerCase().includes(k.split('-')[0]))]
-    || 'var(--accent)';
-
-  const algoKey = Object.keys(ALGO_COLORS).find(k => r.algorithm.toLowerCase().includes(k.replace('-','')))
-    || r.algorithm.toLowerCase();
-
-  content.innerHTML = `
-    <div class="result-card fade-in">
-      <div class="result-header">
-        <span class="algo-dot" style="background:${ALGO_COLORS[getAlgo()] || 'var(--accent)'}"></span>
-        <span class="result-title">${ALGO_NAMES[getAlgo()] || r.algorithm}</span>
-        <span class="result-badge" style="background:rgba(5, 150, 105,.1);color:var(--green);border:1px solid rgba(5, 150, 105,.2)">
-          ${r.positions.length} ocorrência(s)
+function renderRes(r) {
+  document.getElementById('vazio-res').style.display = 'none';
+  const el = document.getElementById('cont-res');
+  el.style.display = 'flex';
+  el.innerHTML = `
+    <div class="card surgir">
+      <div class="cab-card">
+        <span class="dot" style="background:${COR[E.algoAtual]}"></span>
+        <span class="titulo-card">${NOME[E.algoAtual]}</span>
+        <span class="badge-card" style="background:rgba(16, 185, 129,.12);color:var(--verde);border:1px solid rgba(16, 185, 129,.3)">
+          ${r.posicoes.length} ocorrência(s)
         </span>
       </div>
-
-      <div class="metrics">
-        <div class="metric">
-          <div class="val">${r.elapsed_ms} ms</div>
-          <div class="lbl">Tempo de execução</div>
-        </div>
-        <div class="metric">
-          <div class="val">${r.comparacoes.toLocaleString()}</div>
-          <div class="lbl">Comparações</div>
-        </div>
-        <div class="metric">
-          <div class="val">${r.text_length.toLocaleString()}</div>
-          <div class="lbl">n (texto)</div>
-        </div>
-        <div class="metric">
-          <div class="val">${r.pattern_length}</div>
-          <div class="lbl">m (padrão)</div>
-        </div>
+      <div class="metricas">
+        <div class="metrica"><div class="val">${r.tempo_ms} ms</div><div class="rot">Tempo de execução</div></div>
+        <div class="metrica"><div class="val">${r.comparacoes.toLocaleString('pt-BR')}</div><div class="rot">Comparações</div></div>
+        <div class="metrica"><div class="val">${r.tamanho_texto.toLocaleString('pt-BR')}</div><div class="rot">n (texto)</div></div>
+        <div class="metrica"><div class="val">${r.tamanho_padrao}</div><div class="rot">m (padrão)</div></div>
       </div>
-
-      <div class="section-label">Posições encontradas</div>
-      <div class="positions">
-        ${r.positions.length
-          ? r.positions.map(p => `<span class="pos-chip">[${p}–${p + r.pattern_length - 1}]</span>`).join('')
-          : '<span class="no-match">Nenhuma ocorrência encontrada.</span>'}
+      <div class="sec-titulo">Posições encontradas</div>
+      <div class="posicoes">
+        ${r.posicoes.length
+          ? r.posicoes.map(p=>`<span class="chip">[${p}–${p+r.tamanho_padrao-1}]</span>`).join('')
+          : '<span class="sem-match">Nenhuma ocorrência encontrada.</span>'}
       </div>
-
-      <div class="section-label" style="margin-top:.75rem">Complexidade teórica</div>
-      <div class="complexity-row">
-        <span class="cmplx-badge">Melhor: <span>${r.complexity.best}</span></span>
-        <span class="cmplx-badge">Médio: <span>${r.complexity.avg}</span></span>
-        <span class="cmplx-badge">Pior: <span>${r.complexity.worst}</span></span>
+      <div class="sec-titulo" style="margin-top:.7rem">Complexidade teórica</div>
+      <div class="linha-cx">
+        <span class="badge-cx">Melhor: <span>${r.complexidade.melhor}</span></span>
+        <span class="badge-cx">Médio: <span>${r.complexidade.medio}</span></span>
+        <span class="badge-cx">Pior: <span>${r.complexidade.pior}</span></span>
       </div>
     </div>
-
-    <div class="result-card fade-in">
-      <div class="section-label">Texto (primeiros 500 chars)</div>
-      <div class="text-vis" id="result-text-vis">${buildTextVis(getText().slice(0,500), r.positions, getPattern().length)}</div>
-    </div>
-  `;
-}
-
-function buildTextVis(text, positions, plen) {
-  const matchSet = new Set();
-  positions.forEach(p => { for (let i = p; i < p + plen; i++) matchSet.add(i); });
-  return text.split('').map((ch, i) => {
-    const cls = matchSet.has(i) ? 'hi-match' : '';
-    return `<span class="char ${cls}" title="index ${i}">${escHtml(ch)}</span>`;
-  }).join('');
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g,'&nbsp;');
-}
-
-// ══════════════════════════════════════════════════════════════
-//  STEP BY STEP
-// ══════════════════════════════════════════════════════════════
-document.getElementById('btn-step').addEventListener('click', async () => {
-  const text = getText(), pattern = getPattern();
-  if (!text || !pattern) return alert('Informe o texto e o padrão.');
-  setLoading('btn-step', true);
-  stopPlay();
-  try {
-    const result = await apiPost('/api/search', { text, pattern, algorithm: getAlgo() });
-    state.stepData = result;
-    state.stepIndex = 0;
-    initStepView(result);
-    showTab('stepbystep');
-  } catch(e) {
-    alert('Erro ao comunicar com o servidor Python.');
-  } finally {
-    setLoading('btn-step', false);
-  }
-});
-
-function initStepView(r) {
-  const empty   = document.getElementById('step-empty');
-  const content = document.getElementById('step-content');
-  empty.style.display   = 'none';
-  content.style.display = 'flex';
-
-  const dot  = document.getElementById('step-dot');
-  const name = document.getElementById('step-algo-name');
-  dot.style.background = ALGO_COLORS[getAlgo()] || 'var(--accent)';
-  name.textContent = ALGO_NAMES[getAlgo()] || r.algorithm;
-
-  const slider = document.getElementById('step-slider');
-  slider.max   = Math.max(0, r.steps.length - 1);
-  slider.value = 0;
-
-  renderStep(0);
-}
-
-function renderStep(idx) {
-  const r = state.stepData;
-  if (!r) return;
-  const steps = r.steps;
-  const step  = steps[idx] || null;
-  state.stepIndex = idx;
-
-  document.getElementById('step-slider').value = idx;
-  document.getElementById('step-count-label').textContent =
-    `Passo ${idx + 1} / ${steps.length}  ·  ${r.comparacoes} comparações total`;
-
-  // ─ Text visualiser ─
-  const text    = r.text || '';
-  const plen    = r.pattern_length;
-  const winStart = step?.extra?.window_start ?? step?.text_index ?? 0;
-
-  const matchSet = new Set(r.positions.flatMap(p => Array.from({length: plen}, (_, i) => p + i)));
-
-  const textVis = text.slice(0, 600).split('').map((ch, i) => {
-    let cls = '';
-    if (step) {
-      if (step.highlight_text.includes(i) && !matchSet.has(i)) cls = 'hi-window';
-      if (matchSet.has(i)) cls = 'hi-match';
-      if (i === step.text_index) cls = step.match ? 'hi-match' : step.comparacao.includes('mismatch') || !step.match ? 'hi-mismatch' : 'hi-current';
-    }
-    return `<span class="char ${cls}" title="[${i}]">${escHtml(ch)}</span>`;
-  }).join('');
-  document.getElementById('text-vis').innerHTML = textVis;
-
-  // ─ Pattern visualiser ─
-  const pattern   = r.pattern || '';
-  const patternEl = document.getElementById('pattern-vis');
-  patternEl.innerHTML = pattern.split('').map((ch, i) => {
-    let cls = '';
-    if (step) {
-      if (step.highlight_pattern.includes(i)) {
-        cls = i === step.pattern_index ? (step.match ? 'hi-match' : 'hi-mismatch') : 'hi-match';
-      }
-    }
-    return `<span class="pchar ${cls}" title="[${i}]">${escHtml(ch)}</span>`;
-  }).join('');
-
-  // ─ Log ─
-  const log = document.getElementById('step-log');
-  const recent = steps.slice(Math.max(0, idx - 8), idx + 1);
-  log.innerHTML = recent.map((s, ri) => {
-    const isCurrent = ri === recent.length - 1;
-    const cls = isCurrent ? (s.match ? 'ok' : 'fail') : 'info';
-    return `<div class="step-entry ${cls}">
-      <span class="step-num">${s.step_number + 1}</span>
-      <span>${escHtml(s.comparacao)}</span>
+    <div class="card surgir">
+      <div class="sec-titulo">Texto (primeiros 500 chars) — ocorrências em verde</div>
+      <div class="vis-txt">${visTexto(getTxt().slice(0,500), r.posicoes, r.tamanho_padrao)}</div>
     </div>`;
-  }).join('');
-  log.scrollTop = log.scrollHeight;
-
-  // ─ Partial metrics ─
-  const comparacoesUpToNow = idx + 1;
-  const matchesSoFar = r.positions.filter(p => step && p + plen - 1 <= step.text_index).length;
-  document.getElementById('step-metrics').innerHTML = `
-    <div class="metric"><div class="val">${comparacoesUpToNow}</div><div class="lbl">Comparações até aqui</div></div>
-    <div class="metric"><div class="val">${matchesSoFar}</div><div class="lbl">Ocorrências parciais</div></div>
-    <div class="metric"><div class="val">${step ? step.text_index : '-'}</div><div class="lbl">Posição no texto</div></div>
-    <div class="metric"><div class="val">${step ? step.pattern_index : '-'}</div><div class="lbl">Posição no padrão</div></div>
-  `;
 }
 
-// Step controls
-document.getElementById('step-prev').addEventListener('click', () => {
-  stopPlay();
-  if (state.stepIndex > 0) renderStep(state.stepIndex - 1);
-});
-document.getElementById('step-next').addEventListener('click', () => {
-  stopPlay();
-  const max = (state.stepData?.steps.length || 1) - 1;
-  if (state.stepIndex < max) renderStep(state.stepIndex + 1);
-});
-document.getElementById('step-slider').addEventListener('input', e => {
-  stopPlay();
-  renderStep(parseInt(e.target.value));
+function visTexto(txt, pos, m) {
+  const s = new Set(); pos.forEach(p => { for(let i=p;i<p+m;i++) s.add(i); });
+  return txt.split('').map((c,i)=>`<span class="ch ${s.has(i)?'encontrou':''}" title="[${i}]">${esc(c)}</span>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PASSO A PASSO
+// ══════════════════════════════════════════════════════════════
+document.getElementById('btn-passo').addEventListener('click', () => {
+  const txt = getTxt(), pad = getPad();
+  if (!txt || !pad) return alert('Preencha o texto e o padrão antes de continuar.');
+  pararRep();
+  setLoad('btn-passo', true);
+  setTimeout(() => {
+    try {
+      const r = ALGORITMOS[E.algoAtual].buscar(txt, pad);
+      E.dadosPasso = r; E.idx = 0;
+      iniciarPasso(r);
+      mostrarAba('passos');
+    } finally { setLoad('btn-passo', false); }
+  }, 0);
 });
 
-let isPlaying = false;
-document.getElementById('step-play').addEventListener('click', () => {
-  if (isPlaying) { stopPlay(); return; }
-  isPlaying = true;
-  document.getElementById('step-play').textContent = '⏸ Pausar';
-  const max = (state.stepData?.steps.length || 1) - 1;
-  state.playTimer = setInterval(() => {
-    if (state.stepIndex >= max) { stopPlay(); return; }
-    renderStep(state.stepIndex + 1);
+function iniciarPasso(r) {
+  document.getElementById('vazio-pas').style.display    = 'none';
+  document.getElementById('cont-pas').style.display     = 'flex';
+  document.getElementById('dot-pas').style.background   = COR[E.algoAtual];
+  document.getElementById('nome-pas').textContent        = NOME[E.algoAtual];
+  const sl = document.getElementById('slider');
+  sl.max = Math.max(0, r.passos.length - 1);
+  sl.value = 0;
+  renderPasso(0);
+}
+
+function renderPasso(idx) {
+  const r = E.dadosPasso;
+  if (!r) return;
+  const p = r.passos[idx] || null;
+  E.idx = idx;
+
+  document.getElementById('slider').value = idx;
+  document.getElementById('cnt-pas').textContent =
+    `Passo ${idx+1} de ${r.passos.length}  ·  ${r.comparacoes} comparações total`;
+
+  // ── Texto ──
+  const matchSet = new Set();
+  r.posicoes.forEach(pos => { for(let i=pos;i<pos+r.tamanho_padrao;i++) matchSet.add(i); });
+
+  document.getElementById('vis-txt').innerHTML =
+    r._texto.slice(0,600).split('').map((c,i) => {
+      let cl = '';
+      if (p) {
+        if (p.destaque_texto.includes(i) && !matchSet.has(i)) cl = 'janela';
+        if (matchSet.has(i)) cl = 'encontrou';
+        if (i === p.posicao_texto) cl = p.houve_match ? 'encontrou' : 'falhou';
+      }
+      return `<span class="ch ${cl}" title="[${i}]">${esc(c)}</span>`;
+    }).join('');
+
+  // ── Padrão ──
+  document.getElementById('vis-pad').innerHTML =
+    r._padrao.split('').map((c,i) => {
+      let cl = '';
+      if (p && p.destaque_padrao.includes(i)) {
+        cl = (i === p.posicao_padrao) ? (p.houve_match ? 'encontrou' : 'falhou') : 'encontrou';
+      }
+      return `<span class="cp ${cl}" title="[${i}]">${esc(c)}</span>`;
+    }).join('');
+
+  // ── Log ──
+  const logEl = document.getElementById('log-pas');
+  const rec   = r.passos.slice(Math.max(0, idx-8), idx+1);
+  logEl.innerHTML = rec.map((s, ri) => {
+    const atual = ri === rec.length - 1;
+    const cl    = atual ? (s.houve_match ? 'ok' : 'fail') : 'info';
+    return `<div class="log-linha ${cl}"><span class="num-p">${s.numero+1}</span><span>${esc(s.descricao)}</span></div>`;
+  }).join('');
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // ── Métricas parciais ──
+  const matchAte = r.posicoes.filter(pos => p && (pos + r.tamanho_padrao - 1) <= p.posicao_texto).length;
+  document.getElementById('met-pas').innerHTML = `
+    <div class="metrica"><div class="val">${idx+1}</div><div class="rot">Comparações até aqui</div></div>
+    <div class="metrica"><div class="val">${matchAte}</div><div class="rot">Ocorrências parciais</div></div>
+    <div class="metrica"><div class="val">${p ? p.posicao_texto : '-'}</div><div class="rot">Posição no texto</div></div>
+    <div class="metrica"><div class="val">${p ? p.posicao_padrao : '-'}</div><div class="rot">Posição no padrão</div></div>`;
+}
+
+// Controles
+document.getElementById('btn-ant').addEventListener('click', () => { pararRep(); if(E.idx>0) renderPasso(E.idx-1); });
+document.getElementById('btn-prox').addEventListener('click', () => {
+  pararRep();
+  const max = (E.dadosPasso?.passos.length||1)-1;
+  if(E.idx<max) renderPasso(E.idx+1);
+});
+document.getElementById('slider').addEventListener('input', e => { pararRep(); renderPasso(+e.target.value); });
+document.getElementById('btn-rep').addEventListener('click', () => {
+  if (E.tocando) { pararRep(); return; }
+  E.tocando = true;
+  document.getElementById('btn-rep').textContent = '⏸ Pausar';
+  const max = (E.dadosPasso?.passos.length||1)-1;
+  E.timer = setInterval(() => {
+    if (E.idx >= max) { pararRep(); return; }
+    renderPasso(E.idx+1);
   }, 200);
 });
-
-function stopPlay() {
-  clearInterval(state.playTimer);
-  isPlaying = false;
-  const btn = document.getElementById('step-play');
-  if (btn) btn.textContent = '▶ Auto';
+function pararRep() {
+  clearInterval(E.timer); E.tocando = false;
+  const b = document.getElementById('btn-rep');
+  if (b) b.textContent = '▶ Auto';
 }
 
 // ══════════════════════════════════════════════════════════════
-//  TABLES TAB
+//  TABELAS INTERNAS
 // ══════════════════════════════════════════════════════════════
-function renderTables(r) {
-  const empty   = document.getElementById('tables-empty');
-  const content = document.getElementById('tables-content');
-  const tables  = r.extra_tables || {};
+function renderTab(r) {
+  const tab = r.tabelas_extras || {};
+  const vazio = document.getElementById('vazio-tab');
+  const cont  = document.getElementById('cont-tab');
+  if (!Object.keys(tab).length) { vazio.style.display='flex'; cont.style.display='none'; return; }
+  vazio.style.display='none'; cont.style.display='flex'; cont.innerHTML='';
 
-  if (!Object.keys(tables).length) {
-    empty.style.display   = 'flex';
-    content.style.display = 'none';
-    return;
-  }
-  empty.style.display   = 'none';
-  content.style.display = 'flex';
-  content.innerHTML = '';
-
-  // ── KMP: LPS table
-  if (tables.lps) {
-    const card = makeCard('Tabela LPS (Longest Proper Prefix-Suffix)', `
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:.75rem">
-        Para cada posição <em>i</em> no padrão, LPS[i] indica o comprimento do maior prefixo próprio que também é sufixo de <code>pattern[0..i]</code>.
-        Permite saltar comparações redundantes.
+  // KMP: tabela LPS
+  if (tab.lps) {
+    cont.appendChild(criarCard('Tabela LPS — Knuth-Morris-Pratt', `
+      <p style="font-size:.73rem;color:var(--muted);margin-bottom:.7rem;line-height:1.6">
+        <strong>O que é:</strong> LPS[i] = tamanho do maior prefixo de <code>padrão[0..i]</code> que também é sufixo.<br>
+        <strong>Para que serve:</strong> Ao falhar em <em>j</em>, salta para LPS[j-1] — o cursor do texto nunca retrocede!
       </p>
-      <table class="extra-table">
-        <thead><tr><th>Índice</th><th>Char</th><th>LPS</th></tr></thead>
-        <tbody>${tables.lps.map(row => `
-          <tr>
-            <td>${row.index}</td>
-            <td style="color:var(--accent);font-weight:700">${escHtml(row.char)}</td>
-            <td style="color:var(--green);font-weight:700">${row.lps_value}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    `);
-    content.appendChild(card);
+      <table class="tbl"><thead><tr><th>Índice</th><th>Char</th><th>LPS[i]</th><th>Significado</th></tr></thead>
+      <tbody>${tab.lps.map(row=>`<tr>
+        <td>${row.indice}</td>
+        <td style="color:var(--acento);font-weight:700">${esc(row.char)}</td>
+        <td style="color:var(--verde);font-weight:700">${row.valor_lps}</td>
+        <td style="color:var(--muted);font-size:.66rem">${row.valor_lps===0?'Nenhum prefixo-sufixo':`Prefixo de tamanho ${row.valor_lps} é também sufixo`}</td>
+      </tr>`).join('')}</tbody></table>`));
   }
 
-  // ── Boyer-Moore: Bad Character table
-  if (tables.bad_char) {
-    const card = makeCard('Tabela Bad Character (Boyer-Moore)', `
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:.75rem">
-        Armazena a última ocorrência de cada caractere no padrão.
-        Quando há uma não-correspondência, o padrão salta o máximo possível com base nesta tabela.
+  // Boyer-Moore: tabela mau caractere
+  if (tab.mau_caractere) {
+    cont.appendChild(criarCard('Tabela do Mau Caractere — Boyer-Moore', `
+      <p style="font-size:.73rem;color:var(--muted);margin-bottom:.7rem;line-height:1.6">
+        <strong>O que é:</strong> Índice da última ocorrência de cada char no padrão. Ausentes = -1 (pula o padrão inteiro!).<br>
+        <strong>Para que serve:</strong> Ao falhar, alinha o padrão com a última ocorrência do mau caractere.
       </p>
-      <table class="extra-table">
-        <thead><tr><th>Caractere</th><th>Último índice no padrão</th></tr></thead>
-        <tbody>${tables.bad_char.map(row => `
-          <tr>
-            <td style="color:var(--accent);font-weight:700">'${escHtml(row.char)}'</td>
-            <td style="color:var(--yellow);font-weight:700">${row.last_index}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    `);
-    content.appendChild(card);
+      <table class="tbl"><thead><tr><th>Caractere</th><th>Último índice</th><th>Efeito</th></tr></thead>
+      <tbody>${tab.mau_caractere.map(row=>`<tr>
+        <td style="color:var(--acento);font-weight:700">'${esc(row.char)}'</td>
+        <td style="color:var(--amarelo);font-weight:700">${row.ultimo_indice}</td>
+        <td style="color:var(--muted);font-size:.66rem">Alinha até índice ${row.ultimo_indice}</td>
+      </tr>`).join('')}</tbody></table>`));
   }
 
-  // ── Rabin-Karp: hash table
-  if (tables.hashes) {
-    const show = tables.hashes.slice(0, 30);
-    const card = makeCard('Hashes calculados (Rabin-Karp)', `
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:.75rem">
-        BASE = ${tables.base}, MOD = ${tables.mod} · Hash do padrão = <strong style="color:var(--accent)">${tables.pattern_hash}</strong><br>
-        O hash é atualizado com rolling hash em O(1) por deslocamento.
+  // Rabin-Karp: hashes
+  if (tab.hashes) {
+    const ex = tab.hashes.slice(0,30);
+    cont.appendChild(criarCard('Hashes Calculados por Janela — Rabin-Karp', `
+      <p style="font-size:.73rem;color:var(--muted);margin-bottom:.7rem;line-height:1.6">
+        <strong>BASE=${tab.base} · MOD=${tab.mod}</strong> · Hash do padrão: <span style="color:var(--acento);font-weight:700">${tab.hash_padrao}</span><br>
+        Hash diferente → pula a janela. Hash igual → verifica char a char.
       </p>
-      <table class="extra-table">
-        <thead><tr><th>Janela (i)</th><th>Hash do texto</th><th>Hash do padrão</th><th>Match?</th></tr></thead>
-        <tbody>${show.map(h => `
-          <tr>
-            <td>${h.window}</td>
-            <td style="color:var(--cyan);font-weight:700">${h.text_hash}</td>
-            <td style="color:var(--accent);font-weight:700">${h.pattern_hash}</td>
-            <td style="color:${h.text_hash === h.pattern_hash ? 'var(--green)' : 'var(--red)'};font-weight:700">
-              ${h.text_hash === h.pattern_hash ? '✓' : '✗'}
-            </td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-      ${tables.hashes.length > 30 ? `<p style="font-size:.65rem;color:var(--muted);margin-top:.5rem">… e mais ${tables.hashes.length - 30} janelas</p>` : ''}
-    `);
-    content.appendChild(card);
+      <table class="tbl"><thead><tr><th>Janela</th><th>Hash texto</th><th>Hash padrão</th><th>Candidato?</th></tr></thead>
+      <tbody>${ex.map(h=>`<tr>
+        <td>${h.janela}</td>
+        <td style="color:var(--ciano);font-weight:700">${h.hash_texto}</td>
+        <td style="color:var(--acento);font-weight:700">${h.hash_padrao}</td>
+        <td style="color:${h.hash_texto===h.hash_padrao?'var(--verde)':'var(--vermelho)'};font-weight:700">
+          ${h.hash_texto===h.hash_padrao?'✓ Verificar':'✗ Pular'}
+        </td>
+      </tr>`).join('')}</tbody></table>
+      ${tab.hashes.length>30?`<p style="font-size:.62rem;color:var(--muted);margin-top:.45rem">… e mais ${tab.hashes.length-30} janelas</p>`:''}`));
   }
 }
 
-function makeCard(title, bodyHtml) {
-  const div = document.createElement('div');
-  div.className = 'result-card fade-in';
-  div.innerHTML = `
-    <div class="section-label" style="margin-bottom:.75rem">${title}</div>
-    ${bodyHtml}
-  `;
-  return div;
-}
-
 // ══════════════════════════════════════════════════════════════
-//  COMPARE ALL
+//  COMPARAÇÃO
 // ══════════════════════════════════════════════════════════════
-document.getElementById('btn-compare').addEventListener('click', async () => {
-  const text = getText(), pattern = getPattern();
-  if (!text || !pattern) return alert('Informe o texto e o padrão.');
-  setLoading('btn-compare', true);
-  try {
-    const results = await apiPost('/api/compare', { text, pattern });
-    state.compareResults = results;
-    renderCompare(results);
-    showTab('compare');
-  } catch(e) {
-    alert('Erro ao comunicar com o servidor Python.');
-  } finally {
-    setLoading('btn-compare', false);
-  }
+document.getElementById('btn-cmp').addEventListener('click', () => {
+  const txt = getTxt(), pad = getPad();
+  if (!txt || !pad) return alert('Preencha o texto e o padrão antes de comparar.');
+  setLoad('btn-cmp', true);
+  setTimeout(() => {
+    try {
+      const resultados = Object.values(ALGORITMOS).map(a => a.buscar(txt, pad));
+      renderCmp(resultados);
+      mostrarAba('comparacao');
+    } finally { setLoad('btn-cmp', false); }
+  }, 0);
 });
 
-function renderCompare(results) {
-  const empty   = document.getElementById('compare-empty');
-  const content = document.getElementById('compare-content');
-  empty.style.display   = 'none';
-  content.style.display = 'flex';
+function renderCmp(resultados) {
+  document.getElementById('vazio-cmp').style.display = 'none';
+  const el = document.getElementById('cont-cmp');
+  el.style.display = 'flex';
 
-  const algoKeys = ['naive', 'rabin-karp', 'kmp', 'boyer-moore'];
-  const byKey = {};
-  results.forEach((r, i) => { byKey[algoKeys[i]] = r; });
+  const chaves = ['naive','rabin-karp','kmp','boyer-moore'];
+  const porChave = {};
+  resultados.forEach((r,i) => { porChave[chaves[i]] = r; });
 
-  const maxTime  = Math.max(...results.map(r => r.elapsed_ms)) || 1;
-  const maxCmp   = Math.max(...results.map(r => r.comparacoes)) || 1;
+  const maxTempo = Math.max(...resultados.map(r=>r.tempo_ms)) || 1;
+  const maxCmp   = Math.max(...resultados.map(r=>r.comparacoes)) || 1;
+  const minTempo = Math.min(...resultados.map(r=>r.tempo_ms));
 
-  content.innerHTML = `
-    <div class="compare-grid">
-      <div class="cmp-card fade-in">
-        <div class="cmp-title">⏱ Tempo de execução (ms)</div>
-        <div class="bar-chart">
-          ${algoKeys.map(k => {
-            const r = byKey[k];
-            const pct = Math.max(2, (r.elapsed_ms / maxTime) * 100);
-            return `<div class="bar-row">
-              <span class="bar-label">${r.algorithm}</span>
-              <div class="bar-track">
-                <div class="bar-fill" style="width:${pct}%;background:${ALGO_COLORS[k]}">
-                  <span class="bar-val">${r.elapsed_ms} ms</span>
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
+  el.innerHTML = `<div class="grade-cmp">
 
-      <div class="cmp-card fade-in">
-        <div class="cmp-title">🔢 Número de comparações</div>
-        <div class="bar-chart">
-          ${algoKeys.map(k => {
-            const r = byKey[k];
-            const pct = Math.max(2, (r.comparacoes / maxCmp) * 100);
-            return `<div class="bar-row">
-              <span class="bar-label">${r.algorithm}</span>
-              <div class="bar-track">
-                <div class="bar-fill" style="width:${pct}%;background:${ALGO_COLORS[k]}">
-                  <span class="bar-val">${r.comparacoes.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
+    <div class="card-cmp surgir">
+      <div class="titulo-cmp">⏱ Tempo de execução (ms)</div>
+      <div class="barras">${chaves.map(k => {
+        const r = porChave[k], pct = Math.max(2, r.tempo_ms/maxTempo*100);
+        return `<div class="linha-barra">
+          <span class="lbl-barra">${r.algoritmo}</span>
+          <div class="trilha"><div class="preench" style="width:${pct}%;background:${COR[k]}">
+            <span class="val-barra">${r.tempo_ms} ms</span>
+          </div></div></div>`;
+      }).join('')}</div>
+    </div>
 
-      <div class="cmp-card fade-in" style="grid-column:1/-1">
-        <div class="cmp-title">📋 Tabela comparativa completa</div>
-        <table class="extra-table">
-          <thead>
-            <tr>
-              <th>Algoritmo</th>
-              <th>Tempo (ms)</th>
-              <th>Comparações</th>
-              <th>Ocorrências</th>
-              <th>Melhor caso</th>
-              <th>Caso médio</th>
-              <th>Pior caso</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${algoKeys.map(k => {
-              const r = byKey[k];
-              const fastest = r.elapsed_ms === Math.min(...results.map(x => x.elapsed_ms));
-              return `<tr>
-                <td style="color:${ALGO_COLORS[k]};font-weight:700">${r.algorithm}</td>
-                <td style="${fastest ? 'color:var(--green);font-weight:700' : ''}">${r.elapsed_ms} ms ${fastest ? '🏆' : ''}</td>
-                <td>${r.comparacoes.toLocaleString()}</td>
-                <td style="color:var(--green)">${r.positions.length}</td>
-                <td style="color:var(--cyan);font-family:var(--mono);font-size:.7rem">${r.complexity.best}</td>
-                <td style="color:var(--yellow);font-family:var(--mono);font-size:.7rem">${r.complexity.avg}</td>
-                <td style="color:var(--red);font-family:var(--mono);font-size:.7rem">${r.complexity.worst}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
+    <div class="card-cmp surgir">
+      <div class="titulo-cmp">🔢 Comparações realizadas</div>
+      <div class="barras">${chaves.map(k => {
+        const r = porChave[k], pct = Math.max(2, r.comparacoes/maxCmp*100);
+        return `<div class="linha-barra">
+          <span class="lbl-barra">${r.algoritmo}</span>
+          <div class="trilha"><div class="preench" style="width:${pct}%;background:${COR[k]}">
+            <span class="val-barra">${r.comparacoes.toLocaleString('pt-BR')}</span>
+          </div></div></div>`;
+      }).join('')}</div>
+    </div>
 
-      <div class="cmp-card fade-in" style="grid-column:1/-1">
-        <div class="cmp-title">📚 Quando usar cada algoritmo?</div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem">
-          ${[
-            {k:'naive',      icon:'🔨', tip:'Simples de implementar. Bom para textos pequenos ou quando a implementação precisa ser trivial.'},
-            {k:'rabin-karp',  icon:'#️⃣', tip:'Excelente para buscar múltiplos padrões de uma vez. Usa hashing para evitar comparações desnecessárias.'},
-            {k:'kmp',         icon:'🚀', tip:'Ótimo para textos com muitas repetições. A tabela LPS permite saltos inteligentes sem retroceder no texto.'},
-            {k:'boyer-moore', icon:'⚡', tip:'Melhor desempenho na prática para textos longos. Salta grandes porções do texto usando Bad Character.'},
-          ].map(({k, icon, tip}) => `
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.75rem">
-              <div style="color:${ALGO_COLORS[k]};font-weight:700;margin-bottom:.3rem">${icon} ${byKey[k].algorithm}</div>
-              <div style="font-size:.73rem;color:var(--muted);line-height:1.5">${tip}</div>
-            </div>
-          `).join('')}
-        </div>
+    <div class="card-cmp surgir" style="grid-column:1/-1">
+      <div class="titulo-cmp">📋 Tabela comparativa</div>
+      <table class="tbl"><thead>
+        <tr><th>Algoritmo</th><th>Tempo (ms)</th><th>Comparações</th><th>Ocorrências</th><th>Melhor</th><th>Médio</th><th>Pior</th></tr>
+      </thead><tbody>
+        ${chaves.map(k => {
+          const r = porChave[k], ok = r.tempo_ms === minTempo;
+          return `<tr>
+            <td style="color:${COR[k]};font-weight:700">${r.algoritmo}</td>
+            <td style="${ok?'color:var(--verde);font-weight:700':''}">${r.tempo_ms} ms ${ok?'🏆':''}</td>
+            <td>${r.comparacoes.toLocaleString('pt-BR')}</td>
+            <td style="color:var(--verde)">${r.posicoes.length}</td>
+            <td style="color:var(--ciano);font-family:var(--mono);font-size:.67rem">${r.complexidade.melhor}</td>
+            <td style="color:var(--amarelo);font-family:var(--mono);font-size:.67rem">${r.complexidade.medio}</td>
+            <td style="color:var(--vermelho);font-family:var(--mono);font-size:.67rem">${r.complexidade.pior}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table>
+    </div>
+
+    <div class="card-cmp surgir" style="grid-column:1/-1">
+      <div class="titulo-cmp">📚 Quando usar cada algoritmo?</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem">
+        ${[
+          {k:'naive',    i:'🔨', t:'Simples de entender e implementar. Ideal para textos pequenos ou fins didáticos. Sem pré-processamento.'},
+          {k:'rabin-karp', i:'#️⃣', t:'Ótimo para múltiplos padrões. O rolling hash descarta janelas em O(1) sem comparar char a char.'},
+          {k:'kmp',        i:'🚀', t:'Excelente com repetições (DNA, logs). A tabela LPS garante que o cursor do texto nunca retrocede.'},
+          {k:'boyer-moore',i:'⚡', t:'O mais rápido na prática para textos longos. Salta grandes trechos comparando da direita para a esquerda.'},
+        ].map(({k,i,t}) => `
+          <div style="background:var(--superficie2);border:1px solid var(--borda);border-radius:8px;padding:.7rem">
+            <div style="color:${COR[k]};font-weight:700;margin-bottom:.28rem">${i} ${porChave[k].algoritmo}</div>
+            <div style="font-size:.7rem;color:var(--muted);line-height:1.55">${t}</div>
+          </div>`).join('')}
       </div>
     </div>
-  `;
 
-  // Animate bars after render
+  </div>`;
+
+  // Anima as barras
   setTimeout(() => {
-    document.querySelectorAll('.bar-fill').forEach(b => {
-      const w = b.style.width; b.style.width = '0';
-      setTimeout(() => b.style.width = w, 50);
+    document.querySelectorAll('.preench').forEach(b => {
+      const w = b.style.width; b.style.width='0';
+      setTimeout(()=>b.style.width=w, 40);
     });
-  }, 50);
+  }, 40);
 }
-
-// ══════════════════════════════════════════════════════════════
-//  DEMO TEXT (fallback mode — no server)
-// ══════════════════════════════════════════════════════════════
-// If running without server, give demo data so the UI is testable
-async function checkServer() {
-  try {
-    await fetch('/api/algorithms');
-  } catch(e) {
-    document.querySelector('.logo-sub').textContent = '⚠ servidor offline · inicie server.py';
-    document.querySelector('.logo-sub').style.color = 'var(--red)';
-  }
-}
-checkServer();
 </script>
 </body>
 </html>
