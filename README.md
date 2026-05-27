@@ -153,6 +153,8 @@ const data = await apiPost('/api/buscar', { texto, padrao, algoritmo: algoSel })
 
  O layout de front-end entregue pela IA do Claude Code passou em todos os testes de conexão e possuia todas as funcionalidades de dashboard necessárias. Porém, seu design não seguia os padrões de qualidade, por exemplo: tipografia pouco profissional (fonte muito pequena e pouco legível), hierarquia do tamanho de fonte (Whitespace), cores do sistema muito sólidas e escuras.
 
+ ![Texto Alternativo](arquivo/img/telav1.png)
+
 **Utilização de outra IA:** Pensando nas melhorias a serem realizadas no layout, optamos por utilizar a IA do Google (Gemini), por ser mais experiente e profissional no ambito de design.
 
 **Prompt Utilizado:** *finja ser desenvolver frontend com conhecimentos de ux desing e deixe o layout mais clean, mude a letra para algo mais profissional e legivel e as cores para tons mais "dia".*
