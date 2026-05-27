@@ -83,6 +83,7 @@ Baseada em experiencias anteriores utilizando a ferramenta, utilizamos um prompt
 *Você deve me retornar o projeto atualizado e um relatório das alterações realizadas*
 
 ---
+### Alterações realizadas com o auxilio da IA
 
 ### `algoritmos.py`
 | O que mudou | Detalhe |
@@ -226,12 +227,3 @@ python servidor.py
 
 ---
 
-## 6. Resultado dos Testes
-
-```
-════════════════════════════════════════════════════════════════════
-  String Search Lab v2.0 — Suite de Testes
-════════════════════════════════════════════════════════════════════
-  ✅ Todos os testes passaram! 60/60 (100%)
-════════════════════════════════════════════════════════════════════
-```
