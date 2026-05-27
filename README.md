@@ -153,7 +153,7 @@ const data = await apiPost('/api/buscar', { texto, padrao, algoritmo: algoSel })
 
  O layout de front-end entregue pela IA do Claude Code passou em todos os testes de conexão e possuia todas as funcionalidades de dashboard necessárias. Porém, seu design não seguia os padrões de qualidade, por exemplo: tipografia pouco profissional (fonte muito pequena e pouco legível), hierarquia do tamanho de fonte (Whitespace), cores do sistema muito sólidas e escuras.
 
- ![Texto Alternativo](arquivo/img/telav1.png)
+ ![Tela Claude Code](arquivos/img/tela-v1.png)
 
 **Utilização de outra IA:** Pensando nas melhorias a serem realizadas no layout, optamos por utilizar a IA do Google (Gemini), por ser mais experiente e profissional no ambito de design.
 
@@ -169,6 +169,8 @@ Utilização de premissas clássicas de UX/UI, mantendo toda a lógica do JavaSc
 **Bordas e Cores Suavizadas:** Redução no peso das bordas e substituição dos fundos escuros por tons de gelo e branco (inspirado nas paletas do Tailwind CSS e GitHub Light).
 
 **Botões Modernizados:** Adoção de um estilo flat com transições mais fluidas nos hovers, removendo o aspecto de "caixa rígida".
+
+ ![Tela Gemini](arquivos/img/tela-v2.png)
 
 ---
 
