@@ -1,6 +1,13 @@
-# Relatório de Alterações — StringBusca Lab v2.0
 
-## Sumário Executivo
+<h1 align="center">Relatório de Alterações e Utilização de IA</h1>
+
+<p align="center">
+  <strong>Algoritmos Avançados — Católica SC</strong><br/>
+  Comparação de Algoritmos de Busca em Strings
+ </p>
+ <p align="center">
+  Mariele Vieira da Silva e Maria Alice Giuliari
+</p>
 
 O projeto foi evoluído para uma arquitetura cliente-servidor funcional, instrumentada com OpenTelemetry e com um frontend completamente redesenhado.
 
