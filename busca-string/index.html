@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StringBusca Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── reset & tokens (Tema Claro / Day Mode) ────────── */
+:root {
+  --bg:        #f8fafc; /* Fundo geral: cinza super claro */
+  --surface:   #ffffff; /* Paineis e cards: branco puro */
+  --surface2:  #f1f5f9; /* Inputs e hover states */
+  --surface3:  #e2e8f0; /* Scrollbars e destaques */
+  --border:    #e2e8f0; /* Bordas suaves */
+  --border2:   #cbd5e1; /* Bordas mais fortes */
+  --text:      #0f172a; /* Texto principal: ardósia bem escuro */
+  --muted:     #64748b; /* Texto secundário */
+  --dim:       #94a3b8; /* Texto terciário */
+
+  /* Cores dos algoritmos escurecidas levemente para dar contraste no fundo branco */
+  --naive:     #6d28d9; 
+  --rk:        #be185d; 
+  --kmp:       #047857; 
+  --bm:        #b45309; 
+
+  --ok:        #10b981;
+  --err:       #ef4444;
+  --info:      #3b82f6;
+
+  --mono: 'Fira Code', monospace;
+  --sans: 'Inter', sans-serif;
+  --r: 8px;
+  --r2: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; } 
+body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; line-height: 1.5; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+a { color: var(--info); text-decoration: none; }
+
+/* ── layout ───────────────────────────────────────────────── */
+.shell { display: grid; grid-template-rows: 60px 1fr; height: 100vh; }
+
+header {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0 2rem; border-bottom: 1px solid var(--border);
+  background: var(--surface); position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.logo { font-family: var(--mono); font-size: 1rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+.logo em { color: var(--naive); font-style: normal; }
+.version { font-family: var(--mono); font-size: 0.65rem; color: var(--muted);
+  background: var(--surface2); border-radius: 6px; border: 1px solid var(--border);
+  padding: 0.2rem 0.5rem; }
+.spacer { flex: 1; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted);
+  transition: background 0.3s, box-shadow 0.3s; }
+.status-dot.online  { background: var(--ok); box-shadow: 0 0 10px rgba(16,185,129,0.4); }
+.status-dot.offline { background: var(--err); }
+.status-txt { font-family: var(--sans); font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+
+.main { display: grid; grid-template-columns: 340px 1fr; overflow: hidden; }
+
+/* ── sidebar ──────────────────────────────────────────────── */
+.sidebar {
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;
+}
+.sec {
+  font-family: var(--sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+textarea, input[type=text] {
+  width: 100%; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--r); color: var(--text); font-family: var(--mono); font-size: 0.8rem;
+  padding: 0.75rem; resize: vertical; outline: none; transition: border 0.2s, box-shadow 0.2s;
+}
+textarea:focus, input[type=text]:focus { border-color: var(--naive); box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.15); }
+textarea { min-height: 100px; max-height: 250px; line-height: 1.5; }
+
+.lbl { font-size: 0.8rem; font-weight: 500; color: var(--text); margin-bottom: 0.4rem; display: block; }
+
+.upload-zone {
+  border: 1px dashed var(--border2); border-radius: var(--r);
+  padding: 1.2rem 1rem; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: var(--surface);
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+}
+.upload-zone:hover { border-color: var(--naive); background: rgba(109, 40, 217, 0.03); }
+.upload-zone input { display: none; }
+.upload-icon { font-size: 1.4rem; color: var(--muted); transition: color 0.2s; }
+.upload-zone:hover .upload-icon { color: var(--naive); }
+.upload-txt { font-size: 0.75rem; color: var(--muted); }
+#file-list { font-family: var(--mono); font-size: 0.7rem; color: var(--ok); margin-top: 0.3rem; }
+#char-count, #pat-count { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; }
+
+/* ── algorithm grid ───────────────────────────────────────── */
+.algo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.algo-card {
+  border: 1px solid var(--border2); border-radius: var(--r);
+  padding: 0.75rem; cursor: pointer; transition: all 0.2s; background: var(--surface);
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.algo-card:hover { border-color: var(--muted); background: var(--surface2); }
+.algo-card .aname { font-size: 0.85rem; font-weight: 600; }
+.algo-card .acmplx { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); }
+.algo-card[data-algo="naive"].sel     { border-color: var(--naive); background: rgba(109, 40, 217, 0.06); box-shadow: 0 0 0 1px var(--naive); }
+.algo-card[data-algo="rabin-karp"].sel{ border-color: var(--rk);    background: rgba(190, 24, 93, 0.06); box-shadow: 0 0 0 1px var(--rk); }
+.algo-card[data-algo="kmp"].sel       { border-color: var(--kmp);   background: rgba(4, 120, 87, 0.06); box-shadow: 0 0 0 1px var(--kmp); }
+.algo-card[data-algo="boyer-moore"].sel{ border-color: var(--bm);   background: rgba(180, 83, 9, 0.06); box-shadow: 0 0 0 1px var(--bm); }
+
+/* ── buttons ──────────────────────────────────────────────── */
+.btn-row { display: flex; gap: 0.6rem; }
+.btn {
+  flex: 1; padding: 0.6rem; border-radius: var(--r); border: none;
+  font-family: var(--sans); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--naive); color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.btn-primary:hover:not(:disabled) { background: #5b21b6; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+.btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border2); }
+.btn-ghost:hover:not(:disabled) { background: var(--surface2); }
+.btn-compare {
+  width: 100%; background: var(--surface);
+  border: 1px solid var(--border2); color: var(--text); margin-top: 0.6rem;
+}
+.btn-compare:hover:not(:disabled) { background: var(--surface2); border-color: var(--muted); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+.spinner { display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(0,0,0,0.15); border-top-color: currentColor;
+  border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── content area ─────────────────────────────────────────── */
+.content { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+.tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  background: var(--surface); padding: 0 2rem; flex-shrink: 0; gap: 1rem;
+}
+.tab {
+  padding: 1rem 0.5rem; font-size: 0.8rem; font-weight: 500; cursor: pointer;
+  border-bottom: 2px solid transparent; color: var(--muted); transition: all 0.2s; white-space: nowrap;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--naive); border-bottom-color: var(--naive); font-weight: 600; }
+
+.panel { display: none; padding: 2rem; overflow-y: auto; flex: 1; flex-direction: column; gap: 1.5rem; }
+.panel.active { display: flex; }
+
+/* ── cards ────────────────────────────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.card-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.card-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
+.badge { font-family: var(--mono); font-size: 0.7rem; padding: 0.2rem 0.5rem;
+  border-radius: 6px; margin-left: auto; font-weight: 500; }
+
+/* ── metrics ──────────────────────────────────────────────── */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.metric { background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 0.8rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.metric .val { font-family: var(--mono); font-size: 1.2rem; font-weight: 600; color: var(--text); }
+.metric .rot { font-size: 0.7rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── position chips ───────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
+.chip { font-family: var(--mono); font-size: 0.75rem; font-weight: 500;
+  padding: 0.25rem 0.6rem; border-radius: 6px;
+  background: rgba(16,185,129,0.1); color: var(--kmp); border: 1px solid rgba(16,185,129,0.2); }
+.no-match { font-family: var(--sans); font-size: 0.85rem; color: var(--muted); font-style: italic; }
+
+/* ── text visualizer ──────────────────────────────────────── */
+.vis-text {
+  font-family: var(--mono); font-size: 0.85rem; line-height: 1.8; word-break: break-all;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 1rem; max-height: 250px; overflow-y: auto; color: var(--text);
+}
+.ch { display: inline; padding: 0 1px; border-radius: 3px; cursor: default; transition: background 0.1s, color 0.1s; }
+.ch.win    { background: rgba(109, 40, 217, 0.15); }
+.ch.found  { background: var(--ok) !important; color: #ffffff !important; font-weight: 600; }
+.ch.failed { background: rgba(239, 68, 68, 0.15) !important; color: var(--err) !important; }
+
+/* ── pattern visualizer ───────────────────────────────────── */
+.vis-pat { display: flex; gap: 4px; margin-top: 0.5rem; flex-wrap: wrap; }
+.cp {
+  width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+  border: 1px solid var(--border2); border-radius: 6px; background: var(--surface); transition: all 0.2s;
+}
+.cp.found  { background: var(--ok); border-color: var(--ok); color: #ffffff; }
+.cp.failed { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.4); color: var(--err); }
+
+/* ── step log ─────────────────────────────────────────────── */
+.step-log {
+  font-family: var(--mono); font-size: 0.75rem; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--r);
+  max-height: 200px; overflow-y: auto; padding: 0.8rem;
+}
+.log-line { padding: 0.4rem 0.6rem; border-radius: 6px; margin-bottom: 0.3rem;
+  display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.4; color: var(--text); }
+.log-line.ok   { background: rgba(16,185,129,0.1); color: #059669; }
+.log-line.fail { background: rgba(239,68,68,0.1);  color: #dc2626; }
+.log-line.info { background: rgba(59,130,246,0.1); color: #2563eb; }
+.log-num { color: var(--muted); min-width: 3ch; text-align: right; flex-shrink: 0; font-weight: 500; }
+
+/* ── step controls ────────────────────────────────────────── */
+.step-ctrl { display: flex; align-items: center; gap: 1rem; background: var(--surface); padding: 0.5rem 1rem; border-radius: var(--r); border: 1px solid var(--border); }
+.slider {
+  flex: 1; appearance: none; height: 6px; border-radius: 3px;
+  background: var(--surface3); outline: none; cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+  appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--naive); cursor: pointer; transition: transform 0.1s;
+}
+.slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.step-count { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; font-weight: 500; }
+
+/* ── tables ───────────────────────────────────────────────── */
+.tbl { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 0.75rem; }
+.tbl th { background: var(--surface2); padding: 0.6rem; text-align: left;
+  color: var(--muted); border-bottom: 1px solid var(--border2); font-weight: 600; font-family: var(--sans); }
+.tbl td { padding: 0.6rem; border-bottom: 1px solid var(--border); color: var(--text); }
+.tbl tr:hover td { background: rgba(0,0,0,0.02); }
+.tbl tr:last-child td { border-bottom: none; }
+
+/* ── compare ──────────────────────────────────────────────── */
+.cmp-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+.cmp-card { background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.cmp-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+.bars { display: flex; flex-direction: column; gap: 0.8rem; }
+.bar-row { display: flex; align-items: center; gap: 1rem; }
+.bar-lbl { font-family: var(--sans); font-size: 0.75rem; color: var(--muted); width: 90px; flex-shrink: 0; text-align: right; font-weight: 500; }
+.bar-track { flex: 1; background: var(--surface2); border-radius: 6px; height: 24px;
+  overflow: hidden; border: 1px solid var(--border); }
+.bar-fill { height: 100%; border-radius: 5px; display: flex; align-items: center; padding: 0 0.6rem;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); min-width: fit-content; }
+.bar-val { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: #ffffff; white-space: nowrap; }
+
+/* ── analytics ────────────────────────────────────────────── */
+.analytics-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.stat-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.6rem; color: var(--text); }
+.stat-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+.stat-table th { color: var(--muted); font-family: var(--sans); font-weight: 500;
+  padding: 0.5rem; text-align: left; border-bottom: 1px solid var(--border2); }
+.stat-table td { padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
+.stat-table tr:last-child td { border-bottom: none; }
+.sparkline { display: flex; align-items: flex-end; gap: 2px; height: 36px; margin-top: 0.5rem; }
+.spark-bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 3px; transition: opacity 0.2s, background 0.2s; }
+.spark-bar:hover { opacity: 1; filter: brightness(0.8); }
+.no-data { color: var(--muted); font-size: 0.85rem; font-family: var(--sans);
+  padding: 3rem; text-align: center; }
+
+/* ── empty / error ────────────────────────────────────────── */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 4rem; color: var(--muted); gap: 1rem; text-align: center; flex: 1; }
+.empty-icon { font-size: 3rem; opacity: 0.3; margin-bottom: 0.5rem; }
+.empty-txt  { font-size: 0.9rem; max-width: 300px; line-height: 1.5; color: var(--muted); }
+.error-box { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+  border-radius: var(--r); padding: 1rem 1.2rem; color: var(--err);
+  font-family: var(--mono); font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+
+/* ── animations ───────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.fade-up { animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (max-width: 900px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+  .cmp-grid, .analytics-grid { grid-template-columns: 1fr; }
+  header { padding: 0 1rem; }
+  .tabs { padding: 0 1rem; overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header>
+  <div>
+    <div class="logo">String<em>Busca</em>Lab</div>
+  </div>
+  <span class="version">v2.0</span>
+  <div class="spacer"></div>
+  <div class="status-dot" id="status-dot"></div>
+  <span class="status-txt" id="status-txt">verificando…</span>
+</header>
+
+<div class="main">
+
+<aside class="sidebar">
+
+  <div>
+    <div class="sec">Texto fonte</div>
+    <label class="upload-zone" id="upload-zone">
+      <div class="upload-icon">📄</div>
+      <div class="upload-txt">Clique ou arraste arquivos <strong>.txt</strong></div>
+      <input type="file" id="file-input" accept=".txt" multiple>
+      <div id="file-list"></div>
+    </label>
+    <div style="margin:0.8rem 0;text-align:center;font-size:0.7rem;color:var(--muted)">— ou —</div>
+    <label class="lbl">Digitar manualmente</label>
+    <textarea id="txt-input" placeholder="Cole ou digite o texto aqui…"></textarea>
+    <div id="char-count">0 caracteres</div>
+  </div>
+
+  <div>
+    <div class="sec">Padrão de busca</div>
+    <label class="lbl">String a buscar no texto</label>
+    <input type="text" id="pat-input" placeholder="Ex: AABA">
+    <div id="pat-count">0 caracteres</div>
+  </div>
+
+  <div>
+    <div class="sec">Algoritmo</div>
+    <div class="algo-grid" id="algo-grid">
+      <div class="algo-card sel" data-algo="naive">
+        <div class="aname" style="color:var(--naive)">Naive</div>
+        <div class="acmplx">Pior O(n·m)</div>
+      </div>
+      <div class="algo-card" data-algo="rabin-karp">
+        <div class="aname" style="color:var(--rk)">Rabin-Karp</div>
+        <div class="acmplx">Médio O(n+m)</div>
+      </div>
+      <div class="algo-card" data-algo="kmp">
+        <div class="aname" style="color:var(--kmp)">KMP</div>
+        <div class="acmplx">Pior O(n+m)</div>
+      </div>
+      <div class="algo-card" data-algo="boyer-moore">
+        <div class="aname" style="color:var(--bm)">Boyer-Moore</div>
+        <div class="acmplx">Melhor O(n/m)</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sec">Executar</div>
+    <div class="btn-row" style="margin-bottom:0.4rem">
+      <button class="btn btn-primary" id="btn-exec">▶ Executar</button>
+      <button class="btn btn-ghost"   id="btn-step">⏩ Passo a Passo</button>
+    </div>
+    <button class="btn btn-compare" id="btn-cmp">⚡ Comparar algoritmos</button>
+  </div>
+
+</aside>
+
+<main class="content">
+
+  <div class="tabs">
+    <div class="tab active" data-tab="resultado">Resultado</div>
+    <div class="tab"        data-tab="passos">Passo a Passo</div>
+    <div class="tab"        data-tab="tabelas">Tabelas Internas</div>
+    <div class="tab"        data-tab="comparacao">Comparação</div>
+    <div class="tab"        data-tab="analytics">Analytics</div>
+  </div>
+
+  <div class="panel active" id="panel-resultado">
+    <div class="empty" id="empty-res">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-txt">Preencha o texto, defina o padrão e execute uma busca para visualizar o comportamento do algoritmo.</div>
+    </div>
+    <div id="cont-res" style="display:none;flex-direction:column;gap:1.5rem"></div>
+  </div>
+
+  <div class="panel" id="panel-passos">
+    <div class="empty" id="empty-step">
+      <div class="empty-icon">⏯️</div>
+      <div class="empty-txt">Clique em "Passo a Passo" no menu lateral para iniciar a depuração visual.</div>
+    </div>
+    <div id="cont-step" style="display:none;flex-direction:column;gap:1.5rem">
+      <div class="card">
+        <div class="card-head">
+          <span class="dot" id="dot-step"></span>
+          <span class="card-title" id="name-step"></span>
+          <span class="step-count" id="cnt-step" style="margin-left:auto"></span>
+        </div>
+        <div class="step-ctrl" style="margin-bottom:1.5rem">
+          <button class="btn btn-ghost" id="btn-prev" style="flex:0;padding:0.4rem 0.8rem">◀</button>
+          <input type="range" class="slider" id="slider" min="0" value="0">
+          <button class="btn btn-ghost" id="btn-next" style="flex:0;padding:0.4rem 0.8rem">▶</button>
+          <button class="btn btn-primary" id="btn-auto" style="flex:0;padding:0.4rem 1rem">▶ Auto</button>
+        </div>
+        <div class="sec">Texto Analisado</div>
+        <div class="vis-text" id="vis-text"></div>
+        <div class="sec" style="margin-top:1.5rem">Padrão Deslizando</div>
+        <div class="vis-pat" id="vis-pat"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="card">
+          <div class="sec">Métricas parciais</div>
+          <div class="metrics" id="met-step" style="grid-template-columns:1fr;margin-bottom:0"></div>
+        </div>
+        <div class="card">
+          <div class="sec">Log de execução</div>
+          <div class="step-log" id="step-log" style="height:100%;max-height:250px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-tabelas">
+    <div class="empty" id="empty-tab">
+      <div class="empty-icon">📊</div>
+      <div class="empty-txt">Execute um algoritmo avançado para inspecionar suas estruturas de dados em memória.</div>
+    </div>
+    <div id="cont-tab" style="display:none;flex-direction:column;gap:1.5rem"></div>
+  </div>
+
+  <div class="panel" id="panel-comparacao">
+    <div class="empty" id="empty-cmp">
+      <div class="empty-icon">⚡</div>
+      <div class="empty-txt">Teste a eficiência e realize o benchmark entre todos os métodos.</div>
+    </div>
+    <div id="cont-cmp" style="display:none;flex-direction:column;gap:1.5rem"></div>
+  </div>
+
+  <div class="panel" id="panel-analytics">
+    <div class="empty" id="empty-analytics">
+      <div class="empty-icon">📈</div>
+      <div class="empty-txt">Nenhum dado histórico encontrado. Execute buscas para popular os gráficos de desempenho.</div>
+    </div>
+    <div id="cont-analytics" style="display:none;flex-direction:column;gap:1.5rem"></div>
+  </div>
+
+</main>
+</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONFIGURAÇÃO
+// ════════════════════════════════════════════════════════════
+const API = '';   // mesma origem — Flask serve este arquivo
+
+const COR = {
+  'naive':       'var(--naive)',
+  'rabin-karp':  'var(--rk)',
+  'kmp':         'var(--kmp)',
+  'boyer-moore': 'var(--bm)',
+};
+
+const COR_HEX = {
+  'naive':       '#6d28d9',
+  'rabin-karp':  '#be185d',
+  'kmp':         '#047857',
+  'boyer-moore': '#b45309',
+};
+
+// ════════════════════════════════════════════════════════════
+//  STATUS DO BACKEND
+// ════════════════════════════════════════════════════════════
+async function checkBackend() {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-txt');
+  try {
+    const r = await fetch(`${API}/api/algoritmos`, { signal: AbortSignal.timeout(2000) });
+    if (r.ok) {
+      dot.className = 'status-dot online';
+      txt.textContent = 'Servidor conectado';
+      return true;
+    }
+  } catch {}
+  dot.className = 'status-dot offline';
+  txt.textContent = 'Servidor desconectado';
+  return false;
+}
+checkBackend();
+setInterval(checkBackend, 10000);
+
+// ════════════════════════════════════════════════════════════
+//  ABAS
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => showTab(t.dataset.tab));
+});
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
+  if (name === 'analytics') loadAnalytics();
+}
+
+// ════════════════════════════════════════════════════════════
+//  INPUTS
+// ════════════════════════════════════════════════════════════
+const txtInput = document.getElementById('txt-input');
+const patInput = document.getElementById('pat-input');
+
+txtInput.addEventListener('input', () => {
+  document.getElementById('char-count').textContent = `${txtInput.value.length.toLocaleString('pt-BR')} caracteres`;
+});
+patInput.addEventListener('input', () => {
+  document.getElementById('pat-count').textContent = `${patInput.value.length} caracteres`;
+});
+
+// Upload de arquivo
+document.getElementById('file-input').addEventListener('change', async e => {
+  const files = [...e.target.files];
+  if (!files.length) return;
+  const texts = await Promise.all(files.map(f => f.text()));
+  txtInput.value = texts.join('\n');
+  txtInput.dispatchEvent(new Event('input'));
+  document.getElementById('file-list').textContent = files.map(f => `✓ ${f.name}`).join('\n');
+});
+
+// Drag & drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--naive)'; });
+zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+zone.addEventListener('drop', async e => {
+  e.preventDefault(); zone.style.borderColor = '';
+  const files = [...e.dataTransfer.files].filter(f => f.name.endsWith('.txt'));
+  if (!files.length) return;
+  const texts = await Promise.all(files.map(f => f.text()));
+  txtInput.value = texts.join('\n');
+  txtInput.dispatchEvent(new Event('input'));
+  document.getElementById('file-list').textContent = files.map(f => `✓ ${f.name}`).join('\n');
+});
+
+// ════════════════════════════════════════════════════════════
+//  SELEÇÃO DE ALGORITMO
+// ════════════════════════════════════════════════════════════
+let algoSel = 'naive';
+document.querySelectorAll('.algo-card').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.algo-card').forEach(x => x.classList.remove('sel'));
+    c.classList.add('sel');
+    algoSel = c.dataset.algo;
+  });
+});
+
+// ════════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════════
+function getTxt() { return txtInput.value; }
+function getPat() { return patInput.value; }
+function esc(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function setLoading(id, on) {
+  const btn = document.getElementById(id);
+  if (on) {
+    btn._orig = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner"></span> Aguarde…`;
+    btn.disabled = true;
+  } else {
+    btn.innerHTML = btn._orig || btn.innerHTML;
+    btn.disabled = false;
+  }
+}
+
+async function apiPost(endpoint, body) {
+  const r = await fetch(`${API}${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({ erro: `HTTP ${r.status}` }));
+    throw new Error(err.erro || `HTTP ${r.status}`);
+  }
+  return r.json();
+}
+
+function showError(containerId, emptyId, msg) {
+  document.getElementById(emptyId).style.display = 'none';
+  const el = document.getElementById(containerId);
+  el.style.display = 'flex';
+  el.innerHTML = `<div class="error-box">⚠ ${esc(msg)}</div>`;
+}
+
+function makeCard(title, innerHTML, color = '') {
+  const d = document.createElement('div');
+  d.className = 'card fade-up';
+  d.innerHTML = `
+    <div class="card-head">
+      ${color ? `<span class="dot" style="background:${color}"></span>` : ''}
+      <span class="card-title">${esc(title)}</span>
+    </div>
+    ${innerHTML}`;
+  return d;
+}
+
+// ════════════════════════════════════════════════════════════
+//  EXECUTAR — POST /api/buscar
+// ════════════════════════════════════════════════════════════
+let lastResult = null;
+
+document.getElementById('btn-exec').addEventListener('click', async () => {
+  const txt = getTxt(), pat = getPat();
+  if (!txt || !pat) return alert('Preencha o texto e o padrão.');
+
+  setLoading('btn-exec', true);
+  try {
+    const data = await apiPost('/api/buscar', { texto: txt, padrao: pat, algoritmo: algoSel });
+    lastResult = data;
+    renderResult(data);
+    renderTabelas(data);
+    showTab('resultado');
+  } catch (e) {
+    showError('cont-res', 'empty-res', e.message);
+  } finally {
+    setLoading('btn-exec', false);
+  }
+});
+
+function renderResult(r) {
+  document.getElementById('empty-res').style.display = 'none';
+  const el = document.getElementById('cont-res');
+  el.style.display = 'flex';
+  el.innerHTML = '';
+
+  const cor = COR_HEX[algoSel] || '#6d28d9';
+  const ocTotal = r.posicoes.length;
+
+  const card = document.createElement('div');
+  card.className = 'card fade-up';
+  card.innerHTML = `
+    <div class="card-head">
+      <span class="dot" style="background:${cor}"></span>
+      <span class="card-title">${esc(r.algoritmo)}</span>
+      <span class="badge" style="background:rgba(0,0,0,0.04);color:var(--muted);border:1px solid var(--border)">
+        Melhor: ${r.complexidade.melhor} / Pior: ${r.complexidade.pior}
+      </span>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="val" style="color:${ocTotal?'var(--ok)':'var(--err)'}">${ocTotal}</div>
+        <div class="rot">Ocorrências</div>
+      </div>
+      <div class="metric">
+        <div class="val">${r.comparacoes.toLocaleString('pt-BR')}</div>
+        <div class="rot">Comparações</div>
+      </div>
+      <div class="metric">
+        <div class="val">${r.tempo_ms} ms</div>
+        <div class="rot">Tempo de Execução</div>
+      </div>
+      <div class="metric">
+        <div class="val">${r.tamanho_texto.toLocaleString('pt-BR')}</div>
+        <div class="rot">Tamanho Texto</div>
+      </div>
+    </div>
+    <div class="chips">
+      ${ocTotal
+        ? r.posicoes.map(p => `<span class="chip">índice ${p}</span>`).join('')
+        : '<span class="no-match">Nenhuma ocorrência encontrada. O padrão não existe no texto fornecido.</span>'}
+    </div>`;
+
+  // Visualizador do texto (primeiros 500 chars)
+  const preview = r.posicoes.length
+    ? buildTextVis(getTxt().slice(0, 500), r.posicoes, getPat().length)
+    : '';
+
+  if (preview) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div class="sec" style="margin-top:1rem">Visualização de Contexto (500 chars)</div>
+      <div class="vis-text">${preview}</div>`;
+    card.appendChild(wrap);
+  }
+
+  el.appendChild(card);
+}
+
+function buildTextVis(txt, positions, patLen) {
+  const found = new Set();
+  for (const p of positions) {
+    for (let k = 0; k < patLen; k++) found.add(p + k);
+  }
+  return [...txt].map((c, i) => {
+    const cls = found.has(i) ? 'ch found' : 'ch';
+    return `<span class="${cls}">${esc(c)}</span>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  PASSO A PASSO — usa dados do lastResult
+// ════════════════════════════════════════════════════════════
+let stepsData = null;
+let stepIdx   = 0;
+let autoTimer = null;
+
+document.getElementById('btn-step').addEventListener('click', async () => {
+  const txt = getTxt(), pat = getPat();
+  if (!txt || !pat) return alert('Preencha o texto e o padrão.');
+
+  setLoading('btn-step', true);
+  try {
+    const data = await apiPost('/api/buscar', { texto: txt, padrao: pat, algoritmo: algoSel });
+    lastResult = data;
+    stepsData = data;
+    stepIdx = 0;
+    initSteps(data);
+    showTab('passos');
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  } finally {
+    setLoading('btn-step', false);
+  }
+});
+
+function initSteps(data) {
+  document.getElementById('empty-step').style.display = 'none';
+  document.getElementById('cont-step').style.display = 'flex';
+
+  const cor = COR_HEX[algoSel] || '#6d28d9';
+  document.getElementById('dot-step').style.background = cor;
+  document.getElementById('name-step').textContent = data.algoritmo;
+
+  const slider = document.getElementById('slider');
+  slider.max = Math.max(0, data.passos.length - 1);
+  slider.value = 0;
+
+  renderStep(0);
+}
+
+function renderStep(idx) {
+  if (!stepsData) return;
+  const passos = stepsData.passos;
+  if (!passos.length) return;
+  idx = Math.max(0, Math.min(idx, passos.length - 1));
+  stepIdx = idx;
+
+  const p    = passos[idx];
+  const txt  = getTxt();
+  const pat  = getPat();
+
+  // Slider
+  document.getElementById('slider').value = idx;
+  document.getElementById('cnt-step').textContent = `Passo ${idx + 1} de ${passos.length}`;
+
+  // Visualizador texto
+  const desTxt = new Set(p.destaque_texto || []);
+  const visTxt = [...txt.slice(0, 300)].map((c, i) => {
+    let cls = 'ch';
+    if (desTxt.has(i)) cls += p.houve_match && i === p.posicao_texto ? ' found' : p.houve_match ? ' win' : ' failed';
+    return `<span class="${cls}">${esc(c)}</span>`;
+  }).join('');
+  document.getElementById('vis-text').innerHTML = visTxt;
+
+  // Visualizador padrão
+  const desPad = new Set(p.destaque_padrao || []);
+  const visPat = [...pat].map((c, i) => {
+    let cls = 'cp';
+    if (desPad.has(i)) cls += p.houve_match ? ' found' : ' failed';
+    return `<span class="${cls}">${esc(c)}</span>`;
+  }).join('');
+  document.getElementById('vis-pat').innerHTML = visPat;
+
+  // Log
+  const log   = document.getElementById('step-log');
+  const slice = passos.slice(Math.max(0, idx - 7), idx + 1);
+  log.innerHTML = slice.map(s => {
+    const cls = s.houve_match ? 'ok' : s.descricao.startsWith('[') ? 'info' : 'fail';
+    return `<div class="log-line ${cls}">
+      <span class="log-num">${s.numero}</span>
+      <span>${esc(s.descricao)}</span>
+    </div>`;
+  }).join('');
+  log.scrollTop = log.scrollHeight;
+
+  // Métricas parciais
+  const matches = passos.slice(0, idx + 1).filter(s => s.houve_match).length;
+  document.getElementById('met-step').innerHTML = `
+    <div class="metric"><div class="val">${idx + 1}</div><div class="rot">Passos Executados</div></div>
+    <div class="metric"><div class="val">${idx + 1}</div><div class="rot">Comparações Totais</div></div>
+    <div class="metric"><div class="val" style="color:var(--kmp)">${matches}</div><div class="rot">Matches Confirmados</div></div>`;
+}
+
+// Controles
+document.getElementById('btn-prev').addEventListener('click', () => renderStep(stepIdx - 1));
+document.getElementById('btn-next').addEventListener('click', () => renderStep(stepIdx + 1));
+document.getElementById('slider').addEventListener('input', e => renderStep(+e.target.value));
+
+document.getElementById('btn-auto').addEventListener('click', function() {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    this.textContent = '▶ Auto';
+    this.classList.replace('btn-ghost', 'btn-primary');
+    return;
+  }
+  this.textContent = '⏸ Parar';
+  this.classList.replace('btn-primary', 'btn-ghost');
+  autoTimer = setInterval(() => {
+    if (stepIdx >= (stepsData?.passos.length - 1)) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+      const btn = document.getElementById('btn-auto');
+      btn.textContent = '▶ Auto';
+      btn.classList.replace('btn-ghost', 'btn-primary');
+      return;
+    }
+    renderStep(stepIdx + 1);
+  }, 150);
+});
+
+// ════════════════════════════════════════════════════════════
+//  TABELAS INTERNAS
+// ════════════════════════════════════════════════════════════
+function renderTabelas(r) {
+  document.getElementById('empty-tab').style.display = 'none';
+  const cont = document.getElementById('cont-tab');
+  cont.style.display = 'flex';
+  cont.innerHTML = '';
+
+  const tab = r.tabelas_extras || {};
+
+  if (tab.lps) {
+    cont.appendChild(makeCard('Tabela de Prefixos (LPS) — KMP', `
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">
+        <strong>LPS[i]</strong> armazena o tamanho do maior prefixo de <code>padrão[0..i]</code> que também é sufixo.
+        Ao ocorrer falha no índice <em>j</em>, o algoritmo desloca o padrão para LPS[j−1] evitando retroceder o cursor.
+      </p>
+      <table class="tbl"><thead><tr><th>Índice</th><th>Caractere</th><th>LPS[i]</th><th>Significado Lógico</th></tr></thead>
+      <tbody>${tab.lps.map(row => `<tr>
+        <td style="color:var(--dim)">${row.indice}</td>
+        <td style="color:var(--kmp);font-weight:600">${esc(row.char)}</td>
+        <td style="color:var(--text);font-weight:600">${row.valor_lps}</td>
+        <td style="color:var(--muted);font-family:var(--sans);font-size:0.75rem">${row.valor_lps === 0 ? 'Nenhum prefixo combinando' : `Prefixo de tamanho ${row.valor_lps} é igual ao sufixo`}</td>
+      </tr>`).join('')}</tbody></table>`, 'var(--kmp)'));
+  }
+
+  if (tab.mau_caractere) {
+    cont.appendChild(makeCard('Tabela de Mau Caractere — Boyer-Moore', `
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">
+        Guarda o <strong>último índice</strong> de cada caractere contido no padrão. Caso um caractere do texto não exista no padrão, ele recebe <code>−1</code> e permite pular o padrão inteiro em O(1).
+      </p>
+      <table class="tbl"><thead><tr><th>Caractere</th><th>Último Índice Conhecido</th><th>Comportamento de Salto</th></tr></thead>
+      <tbody>${tab.mau_caractere.map(row => `<tr>
+        <td style="color:var(--bm);font-weight:600">'${esc(row.char)}'</td>
+        <td style="color:var(--text);font-weight:600">${row.ultimo_indice}</td>
+        <td style="color:var(--muted);font-family:var(--sans);font-size:0.75rem">Alinha a janela no índice ${row.ultimo_indice}</td>
+      </tr>`).join('')}</tbody></table>`, 'var(--bm)'));
+  }
+
+  if (tab.hashes) {
+    const ex = tab.hashes.slice(0, 30);
+    cont.appendChild(makeCard('Rolling Hash por Janela — Rabin-Karp', `
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">
+        <strong>BASE = ${tab.base}</strong> | <strong>MÓDULO = ${tab.mod}</strong> <br>
+        O Hash pré-computado do padrão é <span style="color:var(--rk);font-weight:600;background:rgba(190,24,93,0.1);padding:0.1rem 0.3rem;border-radius:4px">${tab.hash_padrao}</span>.
+        Janelas com hash diferente são descartadas imediatamente. Hash igual aciona verificação exata de caracteres.
+      </p>
+      <table class="tbl"><thead><tr><th>Índice da Janela</th><th>Hash Gerado (Texto)</th><th>Hash Alvo (Padrão)</th><th>Status da Janela</th></tr></thead>
+      <tbody>${ex.map(h => `<tr>
+        <td style="color:var(--dim)">${h.janela}</td>
+        <td style="color:var(--info);font-weight:600">${h.hash_texto}</td>
+        <td style="color:var(--rk);font-weight:600">${h.hash_padrao}</td>
+        <td style="color:${h.hash_texto === h.hash_padrao ? 'var(--ok)' : 'var(--muted)'};font-weight:600;font-family:var(--sans);font-size:0.75rem">
+          ${h.hash_texto === h.hash_padrao ? '✓ Colisão / Match' : 'Descartada'}</td>
+      </tr>`).join('')}</tbody></table>
+      ${tab.hashes.length > 30 ? `<div style="text-align:center;padding:1rem;color:var(--muted);font-size:0.75rem;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r)">… exibindo as primeiras 30 janelas de ${tab.hashes.length} processadas</div>` : ''}
+    `, 'var(--rk)'));
+  }
+
+  if (!tab.lps && !tab.mau_caractere && !tab.hashes) {
+    cont.innerHTML = '<div class="card" style="display:flex;align-items:center;gap:1rem;color:var(--muted);font-size:0.85rem"><span style="font-size:1.5rem">ℹ️</span> O Algoritmo Naive (Força Bruta) não requer pré-processamento nem mantém tabelas de estado em memória. Ele faz a comparação de forma direta.</div>';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  COMPARAÇÃO — POST /api/comparar
+// ════════════════════════════════════════════════════════════
+document.getElementById('btn-cmp').addEventListener('click', async () => {
+  const txt = getTxt(), pat = getPat();
+  if (!txt || !pat) return alert('Preencha o texto e o padrão antes de comparar.');
+
+  setLoading('btn-cmp', true);
+  try {
+    const resultados = await apiPost('/api/comparar', { texto: txt, padrao: pat });
+    renderComparacao(resultados);
+    showTab('comparacao');
+  } catch (e) {
+    showError('cont-cmp', 'empty-cmp', e.message);
+  } finally {
+    setLoading('btn-cmp', false);
+  }
+});
+
+function renderComparacao(resultados) {
+  document.getElementById('empty-cmp').style.display = 'none';
+  const el = document.getElementById('cont-cmp');
+  el.style.display = 'flex';
+
+  const keys  = ['naive','rabin-karp','kmp','boyer-moore'];
+  const byKey = {};
+  resultados.forEach((r, i) => { byKey[keys[i]] = r; });
+
+  const maxTempo = Math.max(...resultados.map(r => r.tempo_ms)) || 1;
+  const maxCmp   = Math.max(...resultados.map(r => r.comparacoes)) || 1;
+  const minTempo = Math.min(...resultados.map(r => r.tempo_ms));
+
+  el.innerHTML = `<div class="cmp-grid">
+
+    <div class="cmp-card fade-up">
+      <div class="cmp-title">⏱ Benchmarking de Tempo (ms)</div>
+      <div class="bars">${keys.map(k => {
+        const r = byKey[k]; if (!r) return '';
+        const pct = Math.max(5, r.tempo_ms / maxTempo * 100);
+        return `<div class="bar-row">
+          <span class="bar-lbl">${r.algoritmo}</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:0%;background:${COR_HEX[k]}" data-w="${pct}">
+              <span class="bar-val">${r.tempo_ms} ms</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}</div>
+    </div>
+
+    <div class="cmp-card fade-up">
+      <div class="cmp-title">🔢 Complexidade (Operações Práticas)</div>
+      <div class="bars">${keys.map(k => {
+        const r = byKey[k]; if (!r) return '';
+        const pct = Math.max(5, r.comparacoes / maxCmp * 100);
+        return `<div class="bar-row">
+          <span class="bar-lbl">${r.algoritmo}</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:0%;background:${COR_HEX[k]}" data-w="${pct}">
+              <span class="bar-val">${r.comparacoes.toLocaleString('pt-BR')} cmp</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}</div>
+    </div>
+
+    <div class="cmp-card fade-up" style="grid-column:1/-1">
+      <div class="cmp-title">📋 Relatório Técnico</div>
+      <table class="tbl"><thead>
+        <tr><th>Algoritmo</th><th>Tempo Computado</th><th>Comparações Fixas</th><th>Ocorrências</th><th>Cenário Melhor</th><th>Cenário Médio</th><th>Cenário Pior</th></tr>
+      </thead><tbody>
+        ${keys.map(k => {
+          const r = byKey[k]; if (!r) return '';
+          const fastest = r.tempo_ms === minTempo;
+          return `<tr>
+            <td style="color:${COR_HEX[k]};font-weight:600;font-family:var(--sans)">${r.algoritmo}</td>
+            <td style="${fastest ? 'color:var(--ok);font-weight:600;background:rgba(16,185,129,0.05)' : ''}">${r.tempo_ms} ms ${fastest ? '🏆' : ''}</td>
+            <td>${r.comparacoes.toLocaleString('pt-BR')}</td>
+            <td style="color:var(--text);font-weight:600">${r.posicoes.length}</td>
+            <td style="color:var(--ok);font-size:0.7rem">${r.complexidade.melhor}</td>
+            <td style="color:var(--bm);font-size:0.7rem">${r.complexidade.medio}</td>
+            <td style="color:var(--err);font-size:0.7rem">${r.complexidade.pior}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table>
+    </div>
+
+    <div class="cmp-card fade-up" style="grid-column:1/-1">
+      <div class="cmp-title">📚 Análise de Decisão Arquitetural</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem">
+        ${[
+          {k:'naive',       i:'🔨', t:'<strong>Ideal para:</strong> Textos pequenos, implementações didáticas ou padrões muito curtos. Baixo *overhead* inicial.'},
+          {k:'rabin-karp',  i:'#️⃣', t:'<strong>Ideal para:</strong> Busca de múltiplos padrões de uma só vez (plágios). O cálculo do *Hash* evita comparações desnecessárias.'},
+          {k:'kmp',         i:'🚀', t:'<strong>Ideal para:</strong> Estruturas altamente repetitivas como logs e DNA. O ponteiro do texto não sofre retrocesso (*backtracking*).'},
+          {k:'boyer-moore', i:'⚡', t:'<strong>Ideal para:</strong> Textos longos no mundo real. Quanto maior o padrão, mais eficiente ele se torna devido aos grandes saltos na matriz.'},
+        ].map(({k,i,t}) => `
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;display:flex;gap:0.8rem;align-items:flex-start">
+            <div style="font-size:1.5rem">${i}</div>
+            <div>
+              <div style="color:${COR_HEX[k]};font-weight:600;font-family:var(--sans);margin-bottom:0.4rem">${byKey[k]?.algoritmo || k}</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.6;font-family:var(--sans)">${t}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+  </div>`;
+
+  // anima barras
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill').forEach(b => {
+      const w = b.dataset.w;
+      setTimeout(() => { b.style.width = w + '%'; }, 80);
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  ANALYTICS — GET /api/analytics
+// ════════════════════════════════════════════════════════════
+async function loadAnalytics() {
+  const el     = document.getElementById('cont-analytics');
+  const empty  = document.getElementById('empty-analytics');
+  try {
+    const data = await fetch(`${API}/api/analytics`).then(r => r.json());
+    const keys = Object.keys(data);
+    if (!keys.length) { empty.style.display = 'flex'; el.style.display = 'none'; return; }
+
+    empty.style.display = 'none';
+    el.style.display = 'flex';
+    el.innerHTML = '';
+
+    // Resumo geral
+    const totalExec = keys.reduce((s, k) => s + data[k].total_execucoes, 0);
+    const sumCard = document.createElement('div');
+    sumCard.className = 'card fade-up';
+    sumCard.innerHTML = `
+      <div class="card-head"><span class="card-title">📈 Visão Geral de Diagnóstico</span></div>
+      <div class="metrics">
+        <div class="metric" style="background:var(--surface2)"><div class="val">${totalExec}</div><div class="rot">Requisições Totais</div></div>
+        <div class="metric" style="background:var(--surface2)"><div class="val">${keys.length}</div><div class="rot">Algoritmos Monitores</div></div>
+        ${keys.map(k => `
+        <div class="metric">
+          <div class="val" style="color:${COR_HEX[k]}">${data[k].total_execucoes}</div>
+          <div class="rot">${data[k].nome}</div>
+        </div>`).join('')}
+      </div>`;
+    el.appendChild(sumCard);
+
+    // Grid por algoritmo
+    const grid = document.createElement('div');
+    grid.className = 'analytics-grid';
+
+    for (const k of keys) {
+      const d = data[k];
+      const hist = d.historico_recente || [];
+      const maxT = Math.max(...hist.map(e => e.tempo_ms), 0.01);
+
+      const card = document.createElement('div');
+      card.className = 'stat-card fade-up';
+      card.innerHTML = `
+        <div class="stat-title">
+          <span class="dot" style="background:${COR_HEX[k]}"></span>
+          ${esc(d.nome)}
+          <span style="font-family:var(--sans);font-size:0.7rem;font-weight:500;color:var(--muted);margin-left:auto;background:var(--surface);padding:0.2rem 0.6rem;border-radius:4px;border:1px solid var(--border)">${d.total_execucoes} Runs</span>
+        </div>
+        <table class="stat-table">
+          <tr><th>Variável Coletada</th><th>Mínimo</th><th>Médio</th><th>Máximo</th></tr>
+          <tr>
+            <td style="font-family:var(--sans)">T. Latência (ms)</td>
+            <td style="color:var(--ok);font-family:var(--mono)">${d.tempo.min}</td>
+            <td style="color:var(--text);font-family:var(--mono)">${d.tempo.media}</td>
+            <td style="color:var(--err);font-family:var(--mono)">${d.tempo.max}</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--sans)">Ciclos (Cmp)</td>
+            <td style="color:var(--ok);font-family:var(--mono)">${d.comparacoes.min.toLocaleString('pt-BR')}</td>
+            <td style="color:var(--text);font-family:var(--mono)">${Math.round(d.comparacoes.media).toLocaleString('pt-BR')}</td>
+            <td style="color:var(--err);font-family:var(--mono)">${d.comparacoes.max.toLocaleString('pt-BR')}</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--sans)">Hits Encontrados</td>
+            <td colspan="3" style="font-family:var(--mono);color:var(--text)">${d.ocorrencias_total.toLocaleString('pt-BR')} globais</td>
+          </tr>
+        </table>
+        <div style="margin-top:1.2rem">
+          <div style="font-size:0.65rem;color:var(--muted);margin-bottom:0.4rem;font-family:var(--sans);text-transform:uppercase;letter-spacing:0.05em">
+            Histórico Recente (Sparkline)
+          </div>
+          <div class="sparkline">
+            ${hist.map(e => {
+              const h = Math.max(4, Math.round(e.tempo_ms / maxT * 36));
+              return `<div class="spark-bar" style="height:${h}px;background:${COR_HEX[k]};opacity:0.6" title="${e.tempo_ms} ms"></div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    }
+
+    el.appendChild(grid);
+
+  } catch (e) {
+    empty.style.display = 'none';
+    showError('cont-analytics', 'empty-analytics', e.message);
+  }
+}
+</script>
+</body>
+</html>
