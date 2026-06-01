@@ -39,7 +39,7 @@ string_busca_lab/
 
 ## 3. Alterações por Arquivo Utilizando IA
 
-**Uso de IA:**Para a atualização e correções no código foi utilizado a ferramenta de Claude Code, trata-se de um agente de programação inteligente da Anthropic que funciona diretamente no terminal do seu computador. Ele atua como um assistente autônomo que lê o projeto, edita arquivos, roda testes e corrige bugs com base em comandos simples.
+**Uso de IA:** Para a atualização e correções no código foi utilizado a ferramenta de Claude Code, trata-se de um agente de programação inteligente da Anthropic que funciona diretamente no terminal do seu computador. Ele atua como um assistente autônomo que lê o projeto, edita arquivos, roda testes e corrige bugs com base em comandos simples.
 
 Baseada em experiencias anteriores utilizando a ferramenta, utilizamos um prompt extenso e detalhado, visando caracterizar todos as necessidades de mudança no projeto geral. Dessa forma, a IA primeiramente analisa o projeto completo fazendo um diagnostico e depois corrige e faz alterações conforme especificado no comando do prompt.
 
