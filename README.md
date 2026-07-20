@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📊 Relatório de Alterações e Utilização de IA
+# Relatório de Alterações e Utilização de IA
 
 ### Comparação de Algoritmos de Busca em Strings
 
